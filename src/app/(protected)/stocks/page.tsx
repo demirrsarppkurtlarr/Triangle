@@ -4,6 +4,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { HoldingsPreview } from "@/features/stocks/components/holdings-preview";
+import { MarketAutoTick } from "@/features/stocks/components/market-auto-tick";
 import { RefreshPricesButton } from "@/features/stocks/components/refresh-prices-button";
 import { StockTable } from "@/features/stocks/components/stock-table";
 import {
@@ -39,8 +40,9 @@ export default async function StocksPage() {
     <>
       <DashboardHeader
         title="Market"
-        description="US equities · virtual trading · live Twelve Data"
+        description="Simulated equities · fast ticks · game cash"
       />
+      <MarketAutoTick />
       <main className="relative mx-auto max-w-6xl space-y-8 page-pad py-6 md:py-8">
         <div
           className="pointer-events-none absolute inset-x-0 -top-8 h-56 bg-[radial-gradient(ellipse_at_top,_rgba(6,182,212,0.1),_transparent_55%)]"

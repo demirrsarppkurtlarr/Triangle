@@ -1,14 +1,12 @@
 import {
-  fetchTwelveQuotes,
   getMarketStatus,
   MARKET_SYMBOLS,
   type MarketQuote,
-} from "@/lib/market/twelve-data";
-import { createServiceClient } from "@/lib/supabase/admin";
+} from "@/lib/market/simulated-market";
 import { createClient } from "@/lib/supabase/server";
 
-const STALE_MS = 14 * 60_000; // under buy/sell RPC 15-minute freshness window
-
+/** Tick when quotes older than 15s so buy/sell (30s window) stays fresh. */
+const STALE_MS = 15_000;
 
 export type StockListItem = {
   symbol: string;
@@ -38,59 +36,30 @@ export async function syncMarketPrices(): Promise<{
   synced: number;
   quotes: MarketQuote[];
 }> {
-  // Free tier ≈ 8 credits/min; each symbol costs 1. Sync a rotating half.
-  const all = [...MARKET_SYMBOLS];
-  const chunkSize = 6;
-  const buckets = Math.ceil(all.length / chunkSize);
-  const bucket = Math.floor(Date.now() / (30 * 60_000)) % buckets;
-  const symbols = all.slice(bucket * chunkSize, bucket * chunkSize + chunkSize);
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("tick_game_prices");
+  if (error) throw new Error(error.message);
 
-  const quotes = await fetchTwelveQuotes(
-    symbols.length > 0 ? symbols : all.slice(0, chunkSize),
-  );
-  const admin = createServiceClient();
+  const synced =
+    data && typeof data === "object" && "synced" in data
+      ? Number((data as { synced: number }).synced)
+      : MARKET_SYMBOLS.length;
 
-  const rows = quotes.map((q) => ({
-    symbol: q.symbol,
-    price: q.price,
-    change_amount: q.changeAmount,
-    change_percent: q.changePercent,
-    volume: q.volume,
-    recorded_at: new Date().toISOString(),
-  }));
-
-  if (rows.length > 0) {
-    const { error } = await admin.from("stock_prices").insert(rows);
-    if (error) throw new Error(error.message);
-  }
-
-  return { synced: rows.length, quotes };
+  const quotes = await loadLatestQuotes();
+  return { synced, quotes };
 }
 
-export async function ensureFreshPrices(): Promise<MarketQuote[]> {
+async function loadLatestQuotes(): Promise<MarketQuote[]> {
   const supabase = await createClient();
-
   const { data: latest } = await supabase
     .from("stock_prices")
     .select("symbol, price, change_amount, change_percent, volume, recorded_at")
     .order("recorded_at", { ascending: false })
     .limit(80);
 
-  const newest = latest?.[0]?.recorded_at
-    ? new Date(latest[0].recorded_at).getTime()
-    : 0;
-  const isStale = !newest || Date.now() - newest > STALE_MS;
-
-  if (isStale) {
-    try {
-      const { quotes } = await syncMarketPrices();
-      if (quotes.length > 0) return quotes;
-    } catch {
-      // Quota / network — keep serving last known DB prices
-    }
-  }
-
   const bySymbol = new Map<string, MarketQuote>();
+  const status = getMarketStatus();
+
   for (const row of latest ?? []) {
     if (bySymbol.has(row.symbol)) continue;
     bySymbol.set(row.symbol, {
@@ -100,14 +69,33 @@ export async function ensureFreshPrices(): Promise<MarketQuote[]> {
       changePercent: Number(row.change_percent),
       volume: Number(row.volume),
       recordedAt: row.recorded_at,
-      isMarketOpen: getMarketStatus().isOpen,
+      isMarketOpen: status.isOpen,
     });
   }
 
   return [...bySymbol.values()];
 }
 
-/** Chart from our own price history — avoids Twelve Data time_series (burns quota). */
+export async function ensureFreshPrices(): Promise<MarketQuote[]> {
+  const quotes = await loadLatestQuotes();
+  const newest = quotes.reduce((max, q) => {
+    const t = q.recordedAt ? new Date(q.recordedAt).getTime() : 0;
+    return t > max ? t : max;
+  }, 0);
+  const isStale = !newest || Date.now() - newest > STALE_MS;
+
+  if (isStale) {
+    try {
+      const { quotes: fresh } = await syncMarketPrices();
+      if (fresh.length > 0) return fresh;
+    } catch {
+      // Keep last known DB prices if tick fails
+    }
+  }
+
+  return quotes;
+}
+
 export async function getPriceHistory(
   symbol: string,
   limit = 48,
@@ -146,10 +134,7 @@ export async function getMarketList(
       .select("symbol, name, sector, exchange")
       .eq("is_active", true)
       .order("symbol"),
-    supabase
-      .from("stock_favorites")
-      .select("symbol")
-      .eq("user_id", userId),
+    supabase.from("stock_favorites").select("symbol").eq("user_id", userId),
   ]);
 
   const favoriteSet = new Set((favorites ?? []).map((f) => f.symbol));
@@ -216,7 +201,6 @@ export async function getPortfolioHoldings(
 
 export async function getStockDetail(symbol: string, userId: string) {
   const supabase = await createClient();
-  // Caller should have refreshed prices when needed; don't force API here.
 
   const [{ data: meta }, { data: price }, { data: favorite }, { data: holding }] =
     await Promise.all([

@@ -23,8 +23,8 @@ export function StockChart({ data, symbol }: StockChartProps) {
       <div className="flex h-56 flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-border/70 px-6 text-center text-sm text-muted-foreground">
         <p>No price history yet for {symbol}.</p>
         <p className="text-xs">
-          Tap Refresh prices on Market to save quotes (Twelve Data free tier is
-          rate-limited — we cache in the database).
+          Tap Refresh prices on Market to advance the simulated tick and grow
+          this chart from your own price history.
         </p>
       </div>
     );

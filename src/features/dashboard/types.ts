@@ -5,7 +5,10 @@ export type TransactionType =
   | "stock_buy"
   | "stock_sell"
   | "admin_mint"
-  | "fee";
+  | "fee"
+  | "game_purchase"
+  | "game_sale"
+  | "item_trade";
 
 export type TransactionStatus =
   | "pending"
@@ -23,7 +26,8 @@ export type NotificationType =
   | "stock_order_filled"
   | "stock_order_rejected"
   | "admin_action"
-  | "system";
+  | "system"
+  | "game_item";
 
 export type DashboardProfile = {
   id: string;

@@ -37,7 +37,7 @@ export default async function DashboardPage() {
     <>
       <DashboardHeader
         title={`Welcome back, ${greeting}`}
-        description="Live virtual banking · balances update instantly"
+        description="Game cash · stocks · shop · player marketplace"
         username={data.profile.username}
       />
 
@@ -67,6 +67,24 @@ export default async function DashboardPage() {
           }
           extras={
             <div className="space-y-8">
+              <Card className="glass-panel border-border/50">
+                <CardHeader>
+                  <CardTitle>Game start</CardTitle>
+                  <CardDescription>
+                    New accounts begin with $1000 game cash. Trade simulated
+                    stocks or spend in the shop.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-wrap gap-2">
+                  <Button asChild>
+                    <Link href="/shop">Open shop</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/stocks">Simulated market</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+
               <Card className="glass-panel border-border/50">
                 <CardHeader>
                   <CardTitle>Find people</CardTitle>

@@ -35,7 +35,7 @@ export async function refreshMarketPricesAction(): Promise<StockActionState> {
   try {
     const { synced } = await syncMarketPrices();
     revalidateStockPaths();
-    return { success: `Updated ${synced} quotes from Twelve Data` };
+    return { success: `Simulated tick · ${synced} symbols` };
   } catch (error) {
     return {
       error:

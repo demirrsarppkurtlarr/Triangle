@@ -8,7 +8,10 @@ import {
   Bell,
   Briefcase,
   Home,
+  Package,
   Shield,
+  ShoppingBag,
+  Store,
   TrendingUp,
   User,
 } from "lucide-react";
@@ -20,9 +23,12 @@ import { cn } from "@/lib/utils";
 
 const baseNavItems = [
   { href: "/dashboard", label: "Home", icon: Home },
-  { href: "/transfer", label: "Send", icon: ArrowLeftRight },
+  { href: "/shop", label: "Shop", icon: ShoppingBag },
+  { href: "/inventory", label: "Inventory", icon: Package },
   { href: "/stocks", label: "Market", icon: TrendingUp },
+  { href: "/marketplace", label: "Marketplace", icon: Store },
   { href: "/portfolio", label: "Portfolio", icon: Briefcase },
+  { href: "/transfer", label: "Send", icon: ArrowLeftRight },
   { href: "/profile", label: "Profile", icon: User },
 ];
 
@@ -42,22 +48,22 @@ export function AppNav({
   const [isPending, startTransition] = useTransition();
   const reduce = useReducedMotion();
   const navItems = [
-    ...baseNavItems.slice(0, 4),
+    ...baseNavItems.slice(0, 6),
     ...(isAdmin
       ? [{ href: "/admin", label: "Admin", icon: Shield }]
       : []),
-    ...baseNavItems.slice(4),
+    ...baseNavItems.slice(6),
   ];
 
   const mobileItems = [
     { href: "/dashboard", label: "Home", icon: Home },
-    { href: "/transfer", label: "Send", icon: ArrowLeftRight },
+    { href: "/shop", label: "Shop", icon: ShoppingBag },
     { href: "/stocks", label: "Market", icon: TrendingUp },
-    { href: "/portfolio", label: "Holdings", icon: Briefcase },
+    { href: "/marketplace", label: "Trade", icon: Store },
     {
-      href: unreadCount > 0 ? "/notifications" : "/profile",
-      label: unreadCount > 0 ? "Alerts" : "You",
-      icon: unreadCount > 0 ? Bell : User,
+      href: unreadCount > 0 ? "/notifications" : "/inventory",
+      label: unreadCount > 0 ? "Alerts" : "Bag",
+      icon: unreadCount > 0 ? Bell : Package,
     },
   ];
 
@@ -65,6 +71,17 @@ export function AppNav({
     startTransition(() => {
       router.push(href);
     });
+  }
+
+  function isActive(href: string) {
+    if (href === "/stocks") return pathname.startsWith("/stocks");
+    if (href === "/portfolio") return pathname.startsWith("/portfolio");
+    if (href === "/admin") return pathname.startsWith("/admin");
+    if (href === "/shop") return pathname.startsWith("/shop");
+    if (href === "/inventory") return pathname.startsWith("/inventory");
+    if (href === "/marketplace") return pathname.startsWith("/marketplace");
+    if (href === "/notifications") return pathname.startsWith("/notifications");
+    return pathname === href;
   }
 
   if (variant === "mobile") {
@@ -83,14 +100,7 @@ export function AppNav({
         )}
         <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1.5">
           {mobileItems.map((item) => {
-            const active =
-              item.href === "/stocks"
-                ? pathname.startsWith("/stocks")
-                : item.href === "/portfolio"
-                  ? pathname.startsWith("/portfolio")
-                  : pathname === item.href ||
-                    (item.href === "/notifications" &&
-                      pathname.startsWith("/notifications"));
+            const active = isActive(item.href);
             const showBadge =
               item.href === "/notifications" && unreadCount > 0;
             return (
@@ -145,7 +155,7 @@ export function AppNav({
         <TriangleLogo size={34} showGlow />
         <div>
           <p className="font-semibold tracking-tight">TriangleBank</p>
-          <p className="text-xs text-muted-foreground">Virtual wealth</p>
+          <p className="text-xs text-muted-foreground">Game economy</p>
         </div>
       </div>
 
@@ -155,16 +165,9 @@ export function AppNav({
         </div>
       )}
 
-      <nav className="relative flex flex-1 flex-col gap-1 px-3">
+      <nav className="relative flex flex-1 flex-col gap-1 overflow-y-auto px-3">
         {navItems.map((item) => {
-          const active =
-            item.href === "/admin"
-              ? pathname.startsWith("/admin")
-              : item.href === "/stocks"
-                ? pathname.startsWith("/stocks")
-                : item.href === "/portfolio"
-                  ? pathname.startsWith("/portfolio")
-                  : pathname === item.href;
+          const active = isActive(item.href);
           return (
             <Link
               key={item.href}

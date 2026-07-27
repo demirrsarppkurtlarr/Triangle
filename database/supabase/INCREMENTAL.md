@@ -2,26 +2,37 @@
 
 You already ran `full_schema.sql`. **Do not re-run it.**
 
-## Required for Phase 8 (Stock Market)
+## Phase 16 — Game Economy (required)
 
 Run this **once** in Supabase SQL Editor:
+
+```
+database/supabase/incremental/phase-16-game-economy.sql
+```
+
+Adds:
+- Welcome **$1000** for new signups (`handle_new_user`)
+- Simulated market ticks (`tick_game_prices`) + seed prices
+- Shop / inventory / player marketplace tables + RPCs
+- Faster stock stale window (**30 seconds**)
+
+Existing balances are not reset. Mint via admin if you want more cash on old accounts.
+
+## Phase 8 — Stock Trading (if not already run)
 
 ```
 database/supabase/incremental/phase-08-stock-trading.sql
 ```
 
-Adds `buy_stock` and `sell_stock` RPCs (virtual trading against live Twelve Data prices stored in `stock_prices`).
+Phase 16 redefines `buy_stock` / `sell_stock` with the 30s freshness rule.
 
-## Env for live prices
+## Env
 
-```
-TWELVE_DATA_API_KEY=your_key_from_twelvedata.com
-```
-
-Add the same key in Render Dashboard → Environment.
+Twelve Data is **no longer required**. Simulated prices only.
 
 | Phase | SQL needed? | File |
 |-------|-------------|------|
 | 1–7   | No | — |
-| 8     | Yes | `incremental/phase-08-stock-trading.sql` |
-| 9+    | No new SQL yet | — |
+| 8     | Yes (once) | `incremental/phase-08-stock-trading.sql` |
+| 9–15  | No new SQL | — |
+| 16    | Yes (once) | `incremental/phase-16-game-economy.sql` |

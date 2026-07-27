@@ -17,6 +17,9 @@ function getActivityTitle(type: TransactionType, direction: ActivityItem["direct
     stock_sell: "Stock sale",
     admin_mint: "Funds added",
     fee: "Fee",
+    game_purchase: "Shop purchase",
+    game_sale: "Shop sale",
+    item_trade: direction === "in" ? "Marketplace sale" : "Marketplace buy",
   };
   return labels[type];
 }

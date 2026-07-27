@@ -7,8 +7,10 @@ import {
   Bell,
   Briefcase,
   History,
+  Package,
   Send,
-  Settings,
+  ShoppingBag,
+  Store,
   TrendingUp,
 } from "lucide-react";
 
@@ -17,25 +19,46 @@ import { cn } from "@/lib/utils";
 
 const actions = [
   {
-    href: "/transfer",
-    label: "Send",
-    description: "Transfer virtual money",
-    icon: Send,
+    href: "/shop",
+    label: "Shop",
+    description: "Cars, homes, gadgets",
+    icon: ShoppingBag,
     accent: "bg-primary/10 text-primary",
   },
   {
     href: "/stocks",
     label: "Market",
-    description: "Trade US equities",
+    description: "Simulated tick prices",
     icon: TrendingUp,
     accent: "bg-accent/10 text-accent",
   },
   {
+    href: "/marketplace",
+    label: "Marketplace",
+    description: "Player item trades",
+    icon: Store,
+    accent: "bg-success/10 text-success",
+  },
+  {
+    href: "/inventory",
+    label: "Inventory",
+    description: "Your items",
+    icon: Package,
+    accent: "bg-secondary text-foreground",
+  },
+  {
+    href: "/transfer",
+    label: "Send",
+    description: "Player-to-player cash",
+    icon: Send,
+    accent: "bg-secondary text-foreground",
+  },
+  {
     href: "/portfolio",
     label: "Portfolio",
-    description: "Holdings & P/L",
+    description: "Stock holdings",
     icon: Briefcase,
-    accent: "bg-success/10 text-success",
+    accent: "bg-secondary text-foreground",
   },
   {
     href: "/transactions",
@@ -51,13 +74,6 @@ const actions = [
     icon: Bell,
     accent: "bg-secondary text-foreground",
   },
-  {
-    href: "/settings",
-    label: "Settings",
-    description: "Preferences & theme",
-    icon: Settings,
-    accent: "bg-secondary text-foreground",
-  },
 ];
 
 type QuickActionsProps = {
@@ -68,7 +84,7 @@ export function QuickActions({ className }: QuickActionsProps) {
   return (
     <Stagger
       className={cn(
-        "grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3",
+        "grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-4",
         className,
       )}
     >

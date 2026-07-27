@@ -31,14 +31,14 @@ npm install
 cp .env.example .env.local
 ```
 
-### Stock market (Twelve Data)
+### Game economy market
 
-1. Create an API key at [twelvedata.com](https://twelvedata.com/)
-2. Add `TWELVE_DATA_API_KEY` to `.env.local` and Render env vars
-3. Run incremental SQL: `database/supabase/incremental/phase-08-stock-trading.sql`
-4. Open `/stocks` → Refresh prices → trade with virtual balance
+1. Run incremental SQL: `database/supabase/incremental/phase-16-game-economy.sql`
+2. Open `/stocks` — prices are **simulated** (fast random-walk ticks from seed values)
+3. Shop (`/shop`), inventory, and player marketplace use the same game cash
+4. New accounts start with **$1000**
 
-Virtual money only — prices track the real market for simulation.
+Virtual money only — no live market API required.
 
 ### Supabase Setup
 
@@ -119,14 +119,15 @@ render.yaml           # Render Blueprint
 | 5 | ✅ Complete | Dashboard |
 | 6 | ✅ Complete | Transfer system |
 | 7 | ✅ Complete | Admin panel |
-| 8 | ✅ Complete | Stock market (Twelve Data) |
+| 8 | ✅ Complete | Simulated stock market |
 | 9 | ✅ Complete | Portfolio |
 | 10 | ✅ Complete | Realtime |
 | 11 | ✅ Complete | Notifications |
-| 12 | Pending | Mobile optimization |
-| 13 | Pending | Animations |
-| 14 | Pending | Testing |
-| 15 | Pending | Deployment |
+| 12 | ✅ Complete | Mobile optimization |
+| 13 | ✅ Complete | Animations |
+| 14 | ✅ Complete | Testing |
+| 15 | ✅ Complete | Deployment |
+| 16 | ✅ Complete | Game economy (shop, inventory, marketplace) |
 
 ## Environment Variables
 

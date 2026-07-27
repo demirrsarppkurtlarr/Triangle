@@ -4,7 +4,7 @@
 # Deploy:
 # 1. Push this repo to GitHub
 # 2. Render Dashboard → New → Blueprint → select this repo
-# 3. Fill sync:false env vars (Supabase, Twelve Data, public URL)
+# 3. Fill sync:false env vars (Supabase, public URL)
 #
 # Repo: https://github.com/demirrsarppkurtlarr/Triangle
 
@@ -34,5 +34,3 @@ services:
         sync: false
       - key: ADMIN_USERNAME
         value: demirsarpk
-      - key: TWELVE_DATA_API_KEY
-        sync: false

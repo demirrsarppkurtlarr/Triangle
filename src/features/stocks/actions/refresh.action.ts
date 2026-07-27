@@ -24,7 +24,7 @@ export async function refreshMarketPricesFormAction(
     revalidatePath("/stocks");
     revalidatePath("/portfolio");
     revalidatePath("/dashboard");
-    return { success: `Updated ${synced} quotes from Twelve Data` };
+    return { success: `Simulated tick · ${synced} symbols` };
   } catch (error) {
     return {
       error:

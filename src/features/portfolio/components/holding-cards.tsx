@@ -19,8 +19,8 @@ export function HoldingCards({ holdings, totalValue }: HoldingCardsProps) {
       <div className="rounded-[2rem] border border-dashed border-border/70 bg-card/40 px-8 py-16 text-center">
         <p className="text-lg font-semibold tracking-tight">No positions yet</p>
         <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
-          Buy virtual shares on the market. Prices move with Twelve Data — your
-          cash stays simulated.
+          Buy virtual shares on the market. Prices move with the simulated tick —
+          your cash and holdings stay in TriangleBank.
         </p>
         <Link
           href="/stocks"

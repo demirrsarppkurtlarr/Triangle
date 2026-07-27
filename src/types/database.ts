@@ -15,7 +15,10 @@ export type TransactionType =
   | "stock_buy"
   | "stock_sell"
   | "admin_mint"
-  | "fee";
+  | "fee"
+  | "game_purchase"
+  | "game_sale"
+  | "item_trade";
 
 export type TransactionStatus =
   | "pending"
@@ -33,7 +36,8 @@ export type NotificationType =
   | "stock_order_filled"
   | "stock_order_rejected"
   | "admin_action"
-  | "system";
+  | "system"
+  | "game_item";
 
 export type Database = {
   public: {
@@ -318,6 +322,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      game_items: {
+        Row: {
+          id: string;
+          slug: string;
+          name: string;
+          description: string;
+          category: string;
+          rarity: string;
+          shop_price: number;
+          sell_back_rate: number;
+          icon: string;
+          sort_order: number;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      user_inventory: {
+        Row: {
+          id: string;
+          user_id: string;
+          item_id: string;
+          quantity: number;
+          purchase_price: number;
+          acquired_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      item_listings: {
+        Row: {
+          id: string;
+          seller_id: string;
+          item_id: string;
+          quantity: number;
+          price: number;
+          status: string;
+          buyer_id: string | null;
+          created_at: string;
+          sold_at: string | null;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -372,6 +424,44 @@ export type Database = {
           p_symbol: string;
           p_quantity: number;
           p_idempotency_key?: string | null;
+        };
+        Returns: Json;
+      };
+      tick_game_prices: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      buy_game_item: {
+        Args: {
+          p_item_id: string;
+          p_quantity?: number;
+        };
+        Returns: Json;
+      };
+      sell_game_item: {
+        Args: {
+          p_item_id: string;
+          p_quantity?: number;
+        };
+        Returns: Json;
+      };
+      list_inventory_item: {
+        Args: {
+          p_item_id: string;
+          p_quantity: number;
+          p_price: number;
+        };
+        Returns: Json;
+      };
+      cancel_item_listing: {
+        Args: {
+          p_listing_id: string;
+        };
+        Returns: Json;
+      };
+      buy_item_listing: {
+        Args: {
+          p_listing_id: string;
         };
         Returns: Json;
       };

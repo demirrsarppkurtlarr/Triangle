@@ -45,7 +45,7 @@ export default async function PortfolioPage() {
                   Holdings
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Live value from Twelve Data · average cost basis
+                  Simulated value · average cost basis
                 </p>
               </div>
               <HoldingCards
