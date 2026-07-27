@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export const LIVE_PULSE_MS = 3000;
+/** Visible game tick — half-second steps, larger swings. */
+export const LIVE_PULSE_MS = 500;
 
 export type LiveQuote = {
   price: number;
@@ -10,24 +11,31 @@ export type LiveQuote = {
   changeAmount: number;
 };
 
-/** One realistic random-walk step around a server base price. */
+/**
+ * Game-scale random walk: each half-second step moves enough to feel active.
+ * Occasional bigger jumps keep the chart interesting.
+ */
 export function stepLivePrice(live: number, base: number): number {
   if (!Number.isFinite(base) || base <= 0) return live;
 
   const roll = Math.random();
   let move = 0;
-  if (roll < 0.07) {
-    move = (Math.random() < 0.5 ? -1 : 1) * (0.012 + Math.random() * 0.038);
-  } else if (roll < 0.22) {
-    move = (Math.random() - 0.5) * 0.018;
+  if (roll < 0.12) {
+    // Jump: about ±3% … ±8%
+    move = (Math.random() < 0.5 ? -1 : 1) * (0.03 + Math.random() * 0.05);
+  } else if (roll < 0.4) {
+    // Medium: ±1.2% … ±2.8%
+    move = (Math.random() < 0.5 ? -1 : 1) * (0.012 + Math.random() * 0.016);
   } else {
-    move = (Math.random() - 0.5) * 0.006;
+    // Normal tick: ±0.5% … ±1.4%
+    move = (Math.random() < 0.5 ? -1 : 1) * (0.005 + Math.random() * 0.009);
   }
 
   let next = live * (1 + move);
-  next = next + (base - next) * 0.04;
-  const floor = base * 0.82;
-  const ceil = base * 1.22;
+  // Light pull to seed so prices don't drift forever
+  next = next + (base - next) * 0.02;
+  const floor = base * 0.65;
+  const ceil = base * 1.45;
   if (next < floor) next = floor;
   if (next > ceil) next = ceil;
   return Math.round(next * 100) / 100;
@@ -52,12 +60,12 @@ export function useLiveQuote(basePrice: number): LiveQuote {
     baseRef.current = basePrice;
     if (
       basePrice > 0 &&
-      Math.abs(liveRef.current - basePrice) / basePrice > 0.12
+      Math.abs(liveRef.current - basePrice) / basePrice > 0.2
     ) {
       liveRef.current = basePrice;
       openRef.current = basePrice;
     } else if (basePrice > 0) {
-      liveRef.current = liveRef.current + (basePrice - liveRef.current) * 0.35;
+      liveRef.current = liveRef.current + (basePrice - liveRef.current) * 0.2;
     }
     setQuote(toQuote(liveRef.current, openRef.current));
   }, [basePrice]);
@@ -92,7 +100,7 @@ export function useLivePrices(
         live[symbol] = base;
       } else if (base > 0) {
         const current = live[symbol] ?? base;
-        live[symbol] = current + (base - current) * 0.35;
+        live[symbol] = current + (base - current) * 0.2;
       }
     }
     liveRef.current = live;
