@@ -17,7 +17,7 @@ import {
   CATEGORY_LABELS,
   type GameCategory,
   type GameItem,
-} from "@/features/game/services/game.service";
+} from "@/features/game/types";
 import { formatCurrency } from "@/utils/format";
 import { cn } from "@/lib/utils";
 

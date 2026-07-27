@@ -17,7 +17,7 @@ import {
 import {
   CATEGORY_LABELS,
   type MarketplaceListing,
-} from "@/features/game/services/game.service";
+} from "@/features/game/types";
 import { formatCurrency } from "@/utils/format";
 
 const initial: GameActionState = {};

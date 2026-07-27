@@ -32,7 +32,7 @@ import {
   Wine,
 } from "lucide-react";
 
-import type { GameItem } from "@/features/game/services/game.service";
+import type { GameItem } from "@/features/game/types";
 import { cn } from "@/lib/utils";
 
 const ICON_MAP: Record<string, LucideIcon> = {

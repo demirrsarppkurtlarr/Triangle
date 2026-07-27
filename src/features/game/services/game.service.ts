@@ -1,45 +1,19 @@
+import "server-only";
+
 import { createClient } from "@/lib/supabase/server";
+import type {
+  GameItem,
+  InventoryRow,
+  MarketplaceListing,
+} from "@/features/game/types";
 
-export type GameCategory =
-  | "vehicle"
-  | "property"
-  | "gadget"
-  | "collectible"
-  | "lifestyle";
-
-export type GameItem = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  category: GameCategory;
-  rarity: string;
-  shopPrice: number;
-  sellBackRate: number;
-  icon: string;
-  sortOrder: number;
-};
-
-export type InventoryRow = {
-  id: string;
-  itemId: string;
-  quantity: number;
-  purchasePrice: number;
-  acquiredAt: string;
-  item: GameItem;
-};
-
-export type MarketplaceListing = {
-  id: string;
-  sellerId: string;
-  sellerUsername: string;
-  itemId: string;
-  quantity: number;
-  price: number;
-  createdAt: string;
-  item: GameItem;
-  isMine: boolean;
-};
+export type {
+  GameCategory,
+  GameItem,
+  InventoryRow,
+  MarketplaceListing,
+} from "@/features/game/types";
+export { CATEGORY_LABELS } from "@/features/game/types";
 
 function mapItem(row: {
   id: string;
@@ -58,7 +32,7 @@ function mapItem(row: {
     slug: row.slug,
     name: row.name,
     description: row.description,
-    category: row.category as GameCategory,
+    category: row.category as GameItem["category"],
     rarity: row.rarity,
     shopPrice: Number(row.shop_price),
     sellBackRate: Number(row.sell_back_rate),
@@ -175,11 +149,3 @@ export async function getMarketplaceListings(
     })
     .filter((row): row is MarketplaceListing => row !== null);
 }
-
-export const CATEGORY_LABELS: Record<GameCategory, string> = {
-  vehicle: "Vehicles",
-  property: "Homes",
-  gadget: "Gadgets",
-  collectible: "Collectibles",
-  lifestyle: "Lifestyle",
-};
