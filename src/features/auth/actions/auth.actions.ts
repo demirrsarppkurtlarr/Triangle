@@ -67,7 +67,7 @@ export async function signUpAction(
 
   const supabase = await createClient();
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -81,6 +81,14 @@ export async function signUpAction(
 
   if (error) {
     return { error: error.message };
+  }
+
+  // Email confirmation disabled in Supabase → session exists → go straight in
+  if (data.session) {
+    if (data.user) {
+      await trackSession(data.user.id);
+    }
+    redirect("/dashboard");
   }
 
   redirect("/verify-email?email=" + encodeURIComponent(email));
