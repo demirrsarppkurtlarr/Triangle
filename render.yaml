@@ -1,0 +1,38 @@
+# TriangleBank — Render Blueprint
+# https://render.com/docs/blueprint-spec
+#
+# Deploy:
+# 1. Push this repo to GitHub
+# 2. Render Dashboard → New → Blueprint → select this repo
+# 3. Fill sync:false env vars (Supabase, Twelve Data, public URL)
+#
+# Repo: https://github.com/demirrsarppkurtlarr/Triangle
+
+services:
+  - type: web
+    name: triangle-bank
+    runtime: node
+    region: frankfurt
+    plan: free
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_APP_NAME
+        value: TriangleBank
+      - key: NEXT_PUBLIC_APP_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ADMIN_USERNAME
+        value: demirsarpk
+      - key: TWELVE_DATA_API_KEY
+        sync: false
