@@ -49,7 +49,7 @@ export function getMarketStatus(): {
 } {
   return {
     isOpen: true,
-    label: "Simulated · half-second ticks",
+    label: "Simulated · visible every 3s",
   };
 }
 

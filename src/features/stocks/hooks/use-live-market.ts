@@ -2,8 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-/** Visible game tick — half-second steps, larger swings. */
-export const LIVE_PULSE_MS = 500;
+/** UI only refreshes every 3s — hidden micro-steps run inside that window. */
+export const LIVE_PULSE_MS = 3000;
+/** Half-second-scale steps batched into one visible update (3s ≈ 6 × 0.5s). */
+const HIDDEN_STEPS_PER_TICK = 6;
 
 export type LiveQuote = {
   price: number;
@@ -12,8 +14,7 @@ export type LiveQuote = {
 };
 
 /**
- * Game-scale random walk: each half-second step moves enough to feel active.
- * Occasional bigger jumps keep the chart interesting.
+ * One half-second-scale random-walk step (not shown alone).
  */
 export function stepLivePrice(live: number, base: number): number {
   if (!Number.isFinite(base) || base <= 0) return live;
@@ -21,24 +22,33 @@ export function stepLivePrice(live: number, base: number): number {
   const roll = Math.random();
   let move = 0;
   if (roll < 0.12) {
-    // Jump: about ±3% … ±8%
     move = (Math.random() < 0.5 ? -1 : 1) * (0.03 + Math.random() * 0.05);
   } else if (roll < 0.4) {
-    // Medium: ±1.2% … ±2.8%
     move = (Math.random() < 0.5 ? -1 : 1) * (0.012 + Math.random() * 0.016);
   } else {
-    // Normal tick: ±0.5% … ±1.4%
     move = (Math.random() < 0.5 ? -1 : 1) * (0.005 + Math.random() * 0.009);
   }
 
   let next = live * (1 + move);
-  // Light pull to seed so prices don't drift forever
   next = next + (base - next) * 0.02;
   const floor = base * 0.65;
   const ceil = base * 1.45;
   if (next < floor) next = floor;
   if (next > ceil) next = ceil;
   return Math.round(next * 100) / 100;
+}
+
+/** Apply 6 hidden half-second steps, return only the final price for the UI. */
+export function advanceLivePrice(
+  live: number,
+  base: number,
+  steps = HIDDEN_STEPS_PER_TICK,
+): number {
+  let next = live;
+  for (let i = 0; i < steps; i += 1) {
+    next = stepLivePrice(next, base);
+  }
+  return next;
 }
 
 function toQuote(price: number, open: number): LiveQuote {
@@ -74,7 +84,7 @@ export function useLiveQuote(basePrice: number): LiveQuote {
     const id = window.setInterval(() => {
       const base = baseRef.current;
       if (!Number.isFinite(base) || base <= 0) return;
-      const next = stepLivePrice(liveRef.current, base);
+      const next = advanceLivePrice(liveRef.current, base);
       liveRef.current = next;
       setQuote(toQuote(next, openRef.current));
     }, LIVE_PULSE_MS);
@@ -113,7 +123,7 @@ export function useLivePrices(
       const next: Record<string, number> = { ...liveRef.current };
       for (const [symbol, base] of Object.entries(baseMap)) {
         const current = next[symbol] ?? base;
-        next[symbol] = stepLivePrice(current, base);
+        next[symbol] = advanceLivePrice(current, base);
       }
       liveRef.current = next;
       setPrices({ ...next });
