@@ -1,6 +1,7 @@
 "use client";
 
 import { AppNav } from "@/components/layout/app-nav";
+import { RouteWarmup } from "@/components/layout/route-warmup";
 import { PageEnter } from "@/components/motion/page-enter";
 import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
 
@@ -10,6 +11,18 @@ type RealtimeShellProps = {
   isAdmin: boolean;
   children: React.ReactNode;
 };
+
+const APP_ROUTES = [
+  "/dashboard",
+  "/transfer",
+  "/stocks",
+  "/portfolio",
+  "/notifications",
+  "/profile",
+  "/transactions",
+  "/settings",
+  "/admin",
+];
 
 export function RealtimeShell({
   userId,
@@ -21,6 +34,9 @@ export function RealtimeShell({
 
   return (
     <div className="flex min-h-dvh bg-background">
+      <RouteWarmup
+        routes={isAdmin ? APP_ROUTES : APP_ROUTES.filter((r) => r !== "/admin")}
+      />
       <AppNav unreadCount={unreadCount} isAdmin={isAdmin} variant="sidebar" />
       <div className="flex min-h-dvh min-w-0 flex-1 flex-col safe-bottom md:pb-0">
         <PageEnter>{children}</PageEnter>

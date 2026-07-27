@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
 
-import { pageEnter } from "@/lib/motion";
+import { softSpring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 type PageEnterProps = {
@@ -11,7 +11,7 @@ type PageEnterProps = {
   className?: string;
 };
 
-/** Soft Apple-style enter on route change */
+/** Soft enter — never hides content (avoids blank flashes). */
 export function PageEnter({ children, className }: PageEnterProps) {
   const pathname = usePathname();
   const reduce = useReducedMotion();
@@ -24,9 +24,9 @@ export function PageEnter({ children, className }: PageEnterProps) {
     <motion.div
       key={pathname}
       className={cn("min-w-0 flex-1", className)}
-      variants={pageEnter}
-      initial="hidden"
-      animate="show"
+      initial={{ opacity: 0.96, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={softSpring}
     >
       {children}
     </motion.div>
