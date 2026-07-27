@@ -1,8 +1,9 @@
 "use client";
 
-import { LivePrice } from "@/features/stocks/components/live-price";
+import { LivePrice, useLiveQuote } from "@/features/stocks/components/live-price";
 import { MarketAutoTick } from "@/features/stocks/components/market-auto-tick";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/utils/format";
 
 type StockDetailPriceProps = {
   price: number;
@@ -14,28 +15,27 @@ type StockDetailPriceProps = {
 
 export function StockDetailPrice({
   price,
-  changeAmount,
-  changePercent,
   marketLabel,
   recordedAt,
 }: StockDetailPriceProps) {
-  const up = changePercent >= 0;
+  const quote = useLiveQuote(price);
+  const up = quote.changePercent >= 0;
 
   return (
     <div>
       <MarketAutoTick />
-      <p className="text-4xl font-semibold tracking-tight">
-        <LivePrice value={price} />
+      <p className="text-4xl font-semibold tracking-tight tabular-nums">
+        {price > 0 ? formatCurrency(quote.price) : "—"}
       </p>
       <p
         className={cn(
-          "mt-1 text-sm font-medium",
+          "mt-1 text-sm font-medium tabular-nums",
           up ? "text-success" : "text-destructive",
         )}
       >
         {up ? "+" : ""}
-        {changeAmount.toFixed(2)} ({up ? "+" : ""}
-        {changePercent.toFixed(2)}%)
+        {quote.changeAmount.toFixed(2)} ({up ? "+" : ""}
+        {quote.changePercent.toFixed(2)}%)
       </p>
       <p className="mt-1 text-xs text-muted-foreground">
         {marketLabel}
@@ -45,4 +45,8 @@ export function StockDetailPrice({
       </p>
     </div>
   );
+}
+
+export function StockDetailLiveHint({ price }: { price: number }) {
+  return <LivePrice value={price} />;
 }

@@ -38,35 +38,33 @@ export function HoldingsPreview({ holdings }: HoldingsPreviewProps) {
         </p>
       </div>
 
-      <ul className="overflow-hidden rounded-3xl border border-border/50 bg-card/80">
+      <ul className="space-y-2">
         {holdings.map((h) => (
-          <li
-            key={h.symbol}
-            className="flex items-center justify-between gap-3 border-b border-border/40 px-4 py-3 last:border-0"
-          >
-            <div>
-              <Link
-                href={`/stocks/${h.symbol}`}
-                className="font-semibold hover:text-primary"
-              >
-                {h.symbol}
-              </Link>
-              <p className="text-xs text-muted-foreground">
-                {h.quantity} shares · avg {formatCurrency(h.averageCost)}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="font-medium">{formatCurrency(h.marketValue)}</p>
-              <p
-                className={cn(
-                  "text-xs",
-                  h.pnl >= 0 ? "text-success" : "text-destructive",
-                )}
-              >
-                {h.pnl >= 0 ? "+" : ""}
-                {h.pnlPercent.toFixed(2)}%
-              </p>
-            </div>
+          <li key={h.symbol}>
+            <Link
+              href={`/stocks/${h.symbol}`}
+              prefetch
+              className="flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-border/50 bg-card/80 px-4 py-3 transition-colors hover:bg-secondary/50 active:scale-[0.99]"
+            >
+              <div>
+                <p className="font-semibold">{h.symbol}</p>
+                <p className="text-xs text-muted-foreground">
+                  {h.quantity} shares · avg {formatCurrency(h.averageCost)}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-medium">{formatCurrency(h.marketValue)}</p>
+                <p
+                  className={cn(
+                    "text-xs",
+                    h.pnl >= 0 ? "text-success" : "text-destructive",
+                  )}
+                >
+                  {h.pnl >= 0 ? "+" : ""}
+                  {h.pnlPercent.toFixed(2)}%
+                </p>
+              </div>
+            </Link>
           </li>
         ))}
       </ul>

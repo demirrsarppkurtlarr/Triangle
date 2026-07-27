@@ -44,6 +44,20 @@ export async function refreshMarketPricesAction(): Promise<StockActionState> {
   }
 }
 
+/** Quiet DB tick for live market — does not remount the page. */
+export async function tickMarketPricesSilentAction(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  try {
+    await syncMarketPrices();
+  } catch {
+    // ignore — client pulse keeps running
+  }
+}
+
 export async function buyStockAction(
   _prev: StockActionState,
   formData: FormData,

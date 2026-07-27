@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 
-import { refreshMarketPricesAction } from "@/features/stocks/actions/stock.actions";
+import { tickMarketPricesSilentAction } from "@/features/stocks/actions/stock.actions";
 
-/** Persist a real random-walk tick to the DB while the market page is open. */
-const SERVER_TICK_MS = 3000;
+/** Persist server ticks quietly — UI prices move on the client without remounting. */
+const SERVER_TICK_MS = 12_000;
 
 export function MarketAutoTick() {
-  const router = useRouter();
   const busy = useRef(false);
 
   useEffect(() => {
@@ -19,8 +17,7 @@ export function MarketAutoTick() {
       if (busy.current || document.visibilityState !== "visible") return;
       busy.current = true;
       try {
-        const result = await refreshMarketPricesAction();
-        if (!cancelled && result.success) router.refresh();
+        if (!cancelled) await tickMarketPricesSilentAction();
       } finally {
         busy.current = false;
       }
@@ -32,7 +29,7 @@ export function MarketAutoTick() {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [router]);
+  }, []);
 
   return null;
 }
