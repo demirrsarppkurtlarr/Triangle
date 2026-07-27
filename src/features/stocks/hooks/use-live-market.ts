@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export const LIVE_PULSE_MS = 280;
+export const LIVE_PULSE_MS = 3000;
 
 export type LiveQuote = {
   price: number;
