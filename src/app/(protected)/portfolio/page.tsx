@@ -1,10 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
-import { AllocationBars } from "@/features/portfolio/components/allocation-bars";
-import { HoldingCards } from "@/features/portfolio/components/holding-cards";
-import { PortfolioHero } from "@/features/portfolio/components/portfolio-hero";
-import { RecentTrades } from "@/features/portfolio/components/recent-trades";
+import { LivePortfolioView } from "@/features/portfolio/components/live-portfolio-view";
 import { RefreshPricesButton } from "@/features/stocks/components/refresh-prices-button";
 import { getPortfolioSummary } from "@/features/portfolio/services/portfolio.service";
 import { createClient } from "@/lib/supabase/server";
@@ -23,7 +20,7 @@ export default async function PortfolioPage() {
     <>
       <DashboardHeader
         title="Portfolio"
-        description="Your virtual investments · Apple Card simplicity"
+        description="Live virtual investments · updates every tick"
       />
       <main className="relative mx-auto max-w-5xl space-y-8 page-pad py-6 md:py-8">
         <div
@@ -35,33 +32,12 @@ export default async function PortfolioPage() {
           <RefreshPricesButton />
         </div>
 
-        <div className="relative z-10 space-y-8">
-          <PortfolioHero summary={summary} />
-
-          <div className="grid gap-8 lg:grid-cols-5">
-            <div className="space-y-4 lg:col-span-3">
-              <div>
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Holdings
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Simulated value · average cost basis
-                </p>
-              </div>
-              <HoldingCards
-                holdings={holdings}
-                totalValue={summary.totalValue}
-              />
-            </div>
-
-            <div className="space-y-6 lg:col-span-2">
-              <AllocationBars
-                holdings={holdings}
-                totalValue={summary.totalValue}
-              />
-              <RecentTrades trades={trades} />
-            </div>
-          </div>
+        <div className="relative z-10">
+          <LivePortfolioView
+            summary={summary}
+            holdings={holdings}
+            trades={trades}
+          />
         </div>
       </main>
     </>
