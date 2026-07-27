@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { LiveBalanceHero } from "@/features/dashboard/components/live-balance-hero";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
+import { DashboardMotion } from "@/features/dashboard/components/dashboard-motion";
 import { LiveRecentActivity } from "@/features/dashboard/components/live-recent-activity";
 import { NotificationsPreview } from "@/features/dashboard/components/notifications-preview";
 import { QuickActions } from "@/features/dashboard/components/quick-actions";
@@ -40,59 +41,63 @@ export default async function DashboardPage() {
         username={data.profile.username}
       />
 
-      <main className="mx-auto max-w-6xl space-y-8 page-pad py-6 md:py-8">
-        <LiveBalanceHero
-          key={data.account.id}
-          profile={data.profile}
-          account={data.account}
-        />
-
-        <QuickActions />
-
-        <div className="grid gap-8 lg:grid-cols-5">
-          <div className="lg:col-span-3">
+      <main className="mx-auto max-w-6xl page-pad py-6 md:py-8">
+        <DashboardMotion
+          hero={
+            <LiveBalanceHero
+              key={data.account.id}
+              profile={data.profile}
+              account={data.account}
+            />
+          }
+          actions={<QuickActions />}
+          primary={
             <LiveRecentActivity
               key={`${user.id}-${data.account.id}`}
               userId={user.id}
               accountId={data.account.id}
               initialItems={data.recentActivity}
             />
-          </div>
-          <div className="lg:col-span-2">
+          }
+          secondary={
             <NotificationsPreview
               items={data.notifications}
               unreadCount={data.unreadCount}
             />
-          </div>
-        </div>
+          }
+          extras={
+            <div className="space-y-8">
+              <Card className="glass-panel border-border/50">
+                <CardHeader>
+                  <CardTitle>Find people</CardTitle>
+                  <CardDescription>
+                    Search by Triangle ID or username before sending money.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <TriangleIdSearch />
+                </CardContent>
+              </Card>
 
-        <Card className="glass-panel border-border/50">
-          <CardHeader>
-            <CardTitle>Find people</CardTitle>
-            <CardDescription>
-              Search by Triangle ID or username before sending money.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TriangleIdSearch />
-          </CardContent>
-        </Card>
-
-        {data.profile.is_admin && data.profile.username === ADMIN_USERNAME && (
-          <Card className="glass-panel border-primary/20">
-            <CardHeader>
-              <CardTitle>Administrator access</CardTitle>
-              <CardDescription>
-                You have server-enforced admin privileges.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild>
-                <Link href="/admin">Open admin panel</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+              {data.profile.is_admin &&
+                data.profile.username === ADMIN_USERNAME && (
+                  <Card className="glass-panel border-primary/20">
+                    <CardHeader>
+                      <CardTitle>Administrator access</CardTitle>
+                      <CardDescription>
+                        You have server-enforced admin privileges.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button asChild>
+                        <Link href="/admin">Open admin panel</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+            </div>
+          }
+        />
       </main>
     </>
   );

@@ -21,6 +21,70 @@ function getAppUrl() {
   return process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }
 
+function mapAuthError(message: string): string {
+  const lower = message.toLowerCase();
+  if (lower.includes("email logins are disabled")) {
+    return "Email login is turned off in Supabase. Enable Authentication → Providers → Email.";
+  }
+  if (lower.includes("signup is disabled")) {
+    return "New signups are disabled in Supabase. Enable Email signup under Providers → Email.";
+  }
+  if (lower.includes("email not confirmed")) {
+    return "Email is not confirmed yet. Try again — we will confirm it automatically.";
+  }
+  return message;
+}
+
+/** Confirm email via service role so users can enter without clicking mail links. */
+async function confirmEmailByUserId(userId: string): Promise<boolean> {
+  try {
+    const admin = createServiceClient();
+    const { error } = await admin.auth.admin.updateUserById(userId, {
+      email_confirm: true,
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+async function confirmEmailByAddress(email: string): Promise<string | null> {
+  try {
+    const admin = createServiceClient();
+    const { data: profile } = await admin
+      .from("profiles")
+      .select("id")
+      .eq("email", email.toLowerCase())
+      .maybeSingle();
+
+    if (!profile?.id) {
+      // Fallback: scan auth users (small projects)
+      const { data, error } = await admin.auth.admin.listUsers({
+        page: 1,
+        perPage: 200,
+      });
+      if (error || !data?.users) return null;
+      const user = data.users.find(
+        (u) => u.email?.toLowerCase() === email.toLowerCase(),
+      );
+      if (!user) return null;
+      const { error: updateError } = await admin.auth.admin.updateUserById(
+        user.id,
+        { email_confirm: true },
+      );
+      return updateError ? null : user.id;
+    }
+
+    const { error: updateError } = await admin.auth.admin.updateUserById(
+      profile.id,
+      { email_confirm: true },
+    );
+    return updateError ? null : profile.id;
+  } catch {
+    return null;
+  }
+}
+
 async function trackSession(userId: string) {
   const supabase = await createClient();
   const headersList = await headers();
@@ -80,15 +144,27 @@ export async function signUpAction(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: mapAuthError(error.message) };
   }
 
-  // Email confirmation disabled in Supabase → session exists → go straight in
+  // Already signed in (Confirm email off in Supabase)
   if (data.session) {
-    if (data.user) {
-      await trackSession(data.user.id);
-    }
+    if (data.user) await trackSession(data.user.id);
     redirect("/dashboard");
+  }
+
+  // Confirm email still on, but skip the mail step: confirm + sign in
+  if (data.user) {
+    const confirmed = await confirmEmailByUserId(data.user.id);
+    if (confirmed) {
+      const { data: signedIn, error: signInError } =
+        await supabase.auth.signInWithPassword({ email, password });
+
+      if (!signInError && signedIn.session) {
+        await trackSession(data.user.id);
+        redirect("/dashboard");
+      }
+    }
   }
 
   redirect("/verify-email?email=" + encodeURIComponent(email));
@@ -108,15 +184,20 @@ export async function signInAction(
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+  let { data, error } = await supabase.auth.signInWithPassword(parsed.data);
+
+  // Auto-confirm unconfirmed accounts (no email link required)
+  if (error?.message.toLowerCase().includes("email not confirmed")) {
+    const confirmedId = await confirmEmailByAddress(parsed.data.email);
+    if (confirmedId) {
+      const retry = await supabase.auth.signInWithPassword(parsed.data);
+      data = retry.data;
+      error = retry.error;
+    }
+  }
 
   if (error) {
-    if (error.message.includes("Email not confirmed")) {
-      return {
-        error: "Please verify your email before signing in.",
-      };
-    }
-    return { error: error.message };
+    return { error: mapAuthError(error.message) };
   }
 
   if (data.user) {
@@ -165,7 +246,7 @@ export async function forgotPasswordAction(
   );
 
   if (error) {
-    return { error: error.message };
+    return { error: mapAuthError(error.message) };
   }
 
   return {
@@ -193,7 +274,7 @@ export async function resetPasswordAction(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: mapAuthError(error.message) };
   }
 
   redirect("/login?message=password_updated");
@@ -209,6 +290,14 @@ export async function resendVerificationAction(
     return { error: "Email is required" };
   }
 
+  // Prefer auto-confirm over resending mail
+  const confirmedId = await confirmEmailByAddress(email);
+  if (confirmedId) {
+    return {
+      success: "Account confirmed. You can sign in now — no email needed.",
+    };
+  }
+
   const supabase = await createClient();
   const { error } = await supabase.auth.resend({
     type: "signup",
@@ -219,7 +308,7 @@ export async function resendVerificationAction(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: mapAuthError(error.message) };
   }
 
   return { success: "Verification email sent. Check your inbox." };
