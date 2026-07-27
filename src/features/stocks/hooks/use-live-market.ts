@@ -91,7 +91,8 @@ export function useLivePrices(
       if (!(symbol in live) || !Number.isFinite(live[symbol])) {
         live[symbol] = base;
       } else if (base > 0) {
-        live[symbol] = live[symbol] + (base - live[symbol]) * 0.35;
+        const current = live[symbol] ?? base;
+        live[symbol] = current + (base - current) * 0.35;
       }
     }
     liveRef.current = live;
