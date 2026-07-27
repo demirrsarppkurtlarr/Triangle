@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import {
+  ArrowDownLeft,
+  ArrowUpRight,
   Bell,
   Briefcase,
   Gift,
@@ -141,4 +143,18 @@ export function QuickActions({ className }: QuickActionsProps) {
       ))}
     </Stagger>
   );
+}
+
+export function ActivityDirectionIcon({
+  direction,
+}: {
+  direction: "in" | "out" | "neutral";
+}) {
+  if (direction === "in") {
+    return <ArrowDownLeft className="size-4 text-success" />;
+  }
+  if (direction === "out") {
+    return <ArrowUpRight className="size-4 text-destructive" />;
+  }
+  return <History className="size-4 text-muted-foreground" />;
 }
