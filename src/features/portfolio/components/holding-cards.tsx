@@ -73,7 +73,7 @@ function HoldingCard({
         : sellOneQty;
 
     if (!(quantity > 0)) {
-      toast.error("Satılacak hisse yok");
+      toast.error("Nothing to sell");
       return;
     }
 
@@ -87,10 +87,7 @@ function HoldingCard({
         toast.error(result.error);
         return;
       }
-      toast.success(
-        result.success ??
-          `${quantity} ${holding.symbol} satıldı`,
-      );
+      toast.success(result.success ?? `Sold ${quantity} ${holding.symbol}`);
       router.refresh();
     });
   }
@@ -157,10 +154,10 @@ function HoldingCard({
           )}
         >
           {pendingMode === "one" && isPending
-            ? "Satılıyor…"
+            ? "Selling…"
             : canSellOne
-              ? "1 sat"
-              : "Kalanı sat"}
+              ? "Sell 1"
+              : "Sell rest"}
         </button>
         <button
           type="button"
@@ -171,7 +168,7 @@ function HoldingCard({
             "hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50",
           )}
         >
-          {pendingMode === "all" && isPending ? "Satılıyor…" : "Hepsini sat"}
+          {pendingMode === "all" && isPending ? "Selling…" : "Sell all"}
         </button>
       </div>
     </div>
