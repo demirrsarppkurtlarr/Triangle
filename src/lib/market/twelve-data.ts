@@ -95,6 +95,11 @@ export async function fetchTwelveQuotes(
   });
 
   if (!response.ok) {
+    if (response.status === 429) {
+      throw new Error(
+        "Twelve Data rate limit (429). Using cached prices — wait a minute or upgrade your API plan.",
+      );
+    }
     throw new Error(`Twelve Data error: ${response.status}`);
   }
 
@@ -109,11 +114,17 @@ export async function fetchTwelveQuotes(
     "status" in payload &&
     payload.status === "error"
   ) {
-    throw new Error(
-      ("message" in payload && typeof payload.message === "string"
+    const code = "code" in payload ? Number(payload.code) : 0;
+    const message =
+      "message" in payload && typeof payload.message === "string"
         ? payload.message
-        : "Twelve Data request failed"),
-    );
+        : "Twelve Data request failed";
+    if (code === 429 || /limit|quota|429/i.test(message)) {
+      throw new Error(
+        "Twelve Data rate limit (429). Using cached prices — wait a minute or upgrade your API plan.",
+      );
+    }
+    throw new Error(message);
   }
 
   const quotes: TwelveQuote[] = [];

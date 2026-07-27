@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { RealtimeShell } from "@/components/layout/realtime-shell";
-import { getDashboardData } from "@/features/dashboard/services/dashboard.service";
+import { getShellNavData } from "@/features/dashboard/services/shell.service";
 import { createClient } from "@/lib/supabase/server";
-import { ADMIN_USERNAME } from "@/utils/constants";
 
 type ProtectedLayoutProps = {
   children: React.ReactNode;
@@ -21,20 +20,14 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
-  const dashboard = await getDashboardData(user.id);
-  const unreadCount = dashboard?.unreadCount ?? 0;
-  const isAdmin = Boolean(
-    dashboard?.profile.username === ADMIN_USERNAME &&
-      dashboard?.profile.is_admin &&
-      !dashboard?.profile.is_frozen,
-  );
+  const shell = await getShellNavData(user.id);
 
   return (
     <RealtimeShell
       key={user.id}
       userId={user.id}
-      initialUnread={unreadCount}
-      isAdmin={isAdmin}
+      initialUnread={shell?.unreadCount ?? 0}
+      isAdmin={shell?.isAdmin ?? false}
     >
       {children}
     </RealtimeShell>

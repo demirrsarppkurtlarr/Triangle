@@ -3,8 +3,11 @@ import { notFound, redirect } from "next/navigation";
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { StockChart } from "@/features/stocks/components/stock-chart";
 import { TradeForm } from "@/features/stocks/components/trade-form";
-import { getStockDetail } from "@/features/stocks/services/market.service";
-import { fetchTimeSeries } from "@/lib/market/twelve-data";
+import {
+  getPriceHistory,
+  getStockDetail,
+  ensureFreshPrices,
+} from "@/features/stocks/services/market.service";
 import {
   Card,
   CardContent,
@@ -31,21 +34,19 @@ export default async function StockDetailPage({ params }: StockDetailPageProps) 
 
   if (!user) redirect("/login");
 
+  // One refresh attempt for the whole page (cached 30m) — no time_series API
+  await ensureFreshPrices();
   const detail = await getStockDetail(symbol, user.id);
   if (!detail) notFound();
 
-  const { data: account } = await supabase
-    .from("bank_accounts")
-    .select("balance")
-    .eq("user_id", user.id)
-    .single();
-
-  let chartData: { datetime: string; close: number }[] = [];
-  try {
-    chartData = await fetchTimeSeries(symbol, "1day", 30);
-  } catch {
-    chartData = [];
-  }
+  const [{ data: account }, chartData] = await Promise.all([
+    supabase
+      .from("bank_accounts")
+      .select("balance")
+      .eq("user_id", user.id)
+      .single(),
+    getPriceHistory(symbol),
+  ]);
 
   const up = detail.changePercent >= 0;
 

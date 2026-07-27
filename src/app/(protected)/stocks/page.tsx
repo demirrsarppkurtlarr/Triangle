@@ -9,6 +9,7 @@ import { StockTable } from "@/features/stocks/components/stock-table";
 import {
   getMarketList,
   getPortfolioHoldings,
+  ensureFreshPrices,
 } from "@/features/stocks/services/market.service";
 import {
   Card,
@@ -28,9 +29,10 @@ export default async function StocksPage() {
 
   if (!user) redirect("/login");
 
+  const quotes = await ensureFreshPrices();
   const [{ stocks, marketLabel, isOpen }, holdings] = await Promise.all([
-    getMarketList(user.id),
-    getPortfolioHoldings(user.id),
+    getMarketList(user.id, quotes),
+    getPortfolioHoldings(user.id, quotes),
   ]);
 
   return (

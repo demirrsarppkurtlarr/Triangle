@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { randomUUID } from "crypto";
 
 import { tradeSchema } from "@/features/stocks/schemas/trade.schemas";
-import { syncMarketPrices } from "@/features/stocks/services/market.service";
+import {
+  ensureFreshPrices,
+  syncMarketPrices,
+} from "@/features/stocks/services/market.service";
 import { createClient } from "@/lib/supabase/server";
 
 export type StockActionState = {
@@ -61,7 +64,7 @@ export async function buyStockAction(
   if (!user) return { error: "Not authenticated" };
 
   try {
-    await syncMarketPrices();
+    await ensureFreshPrices();
   } catch {
     // Continue if DB has recent prices; RPC enforces freshness
   }
@@ -100,7 +103,7 @@ export async function sellStockAction(
   if (!user) return { error: "Not authenticated" };
 
   try {
-    await syncMarketPrices();
+    await ensureFreshPrices();
   } catch {
     // Continue if DB has recent prices
   }

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useTransition } from "react";
 import {
   ArrowLeftRight,
   Bell,
@@ -37,6 +38,8 @@ export function AppNav({
   variant = "sidebar",
 }: AppNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const reduce = useReducedMotion();
   const navItems = [
     ...baseNavItems.slice(0, 4),
@@ -58,12 +61,26 @@ export function AppNav({
     },
   ];
 
+  function navigate(href: string) {
+    startTransition(() => {
+      router.push(href);
+    });
+  }
+
   if (variant === "mobile") {
     return (
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-card/95 backdrop-blur-xl md:hidden"
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-40 border-t border-border/60 bg-card/95 backdrop-blur-xl md:hidden",
+          isPending && "opacity-90",
+        )}
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
+        {isPending && (
+          <div className="absolute inset-x-0 top-0 h-0.5 overflow-hidden">
+            <div className="h-full w-1/3 animate-[nav-progress_0.9s_ease-in-out_infinite] rounded-full bg-primary" />
+          </div>
+        )}
         <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pt-1.5">
           {mobileItems.map((item) => {
             const active =
@@ -80,6 +97,11 @@ export function AppNav({
               <Link
                 key={item.href + item.label}
                 href={item.href}
+                prefetch
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(item.href);
+                }}
                 className={cn(
                   "relative flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl px-1 py-2 text-[10px] font-medium transition-colors active:scale-[0.97] sm:text-[11px]",
                   active
@@ -127,6 +149,12 @@ export function AppNav({
         </div>
       </div>
 
+      {isPending && (
+        <div className="mx-3 mb-2 h-0.5 overflow-hidden rounded-full bg-secondary">
+          <div className="h-full w-1/3 animate-[nav-progress_0.9s_ease-in-out_infinite] rounded-full bg-primary" />
+        </div>
+      )}
+
       <nav className="relative flex flex-1 flex-col gap-1 px-3">
         {navItems.map((item) => {
           const active =
@@ -141,6 +169,11 @@ export function AppNav({
             <Link
               key={item.href}
               href={item.href}
+              prefetch
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(item.href);
+              }}
               className={cn(
                 "relative flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors",
                 active
@@ -168,6 +201,11 @@ export function AppNav({
       <div className="px-4 pb-6">
         <Link
           href="/notifications"
+          prefetch
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/notifications");
+          }}
           className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-muted-foreground transition-colors hover:bg-secondary/80 hover:text-foreground"
         >
           <Bell className="size-4" />

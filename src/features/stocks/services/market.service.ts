@@ -1,12 +1,14 @@
 import {
   fetchTwelveQuotes,
   getMarketStatus,
+  MARKET_SYMBOLS,
   type MarketQuote,
 } from "@/lib/market/twelve-data";
 import { createServiceClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-const STALE_MS = 60_000;
+const STALE_MS = 14 * 60_000; // under buy/sell RPC 15-minute freshness window
+
 
 export type StockListItem = {
   symbol: string;
@@ -36,7 +38,16 @@ export async function syncMarketPrices(): Promise<{
   synced: number;
   quotes: MarketQuote[];
 }> {
-  const quotes = await fetchTwelveQuotes();
+  // Free tier ≈ 8 credits/min; each symbol costs 1. Sync a rotating half.
+  const all = [...MARKET_SYMBOLS];
+  const chunkSize = 6;
+  const buckets = Math.ceil(all.length / chunkSize);
+  const bucket = Math.floor(Date.now() / (30 * 60_000)) % buckets;
+  const symbols = all.slice(bucket * chunkSize, bucket * chunkSize + chunkSize);
+
+  const quotes = await fetchTwelveQuotes(
+    symbols.length > 0 ? symbols : all.slice(0, chunkSize),
+  );
   const admin = createServiceClient();
 
   const rows = quotes.map((q) => ({
@@ -63,19 +74,19 @@ export async function ensureFreshPrices(): Promise<MarketQuote[]> {
     .from("stock_prices")
     .select("symbol, price, change_amount, change_percent, volume, recorded_at")
     .order("recorded_at", { ascending: false })
-    .limit(50);
+    .limit(80);
 
   const newest = latest?.[0]?.recorded_at
     ? new Date(latest[0].recorded_at).getTime()
     : 0;
-  const isStale = Date.now() - newest > STALE_MS;
+  const isStale = !newest || Date.now() - newest > STALE_MS;
 
   if (isStale) {
     try {
       const { quotes } = await syncMarketPrices();
-      return quotes;
+      if (quotes.length > 0) return quotes;
     } catch {
-      // Fall back to cached DB prices if API fails / quota exceeded
+      // Quota / network — keep serving last known DB prices
     }
   }
 
@@ -96,13 +107,37 @@ export async function ensureFreshPrices(): Promise<MarketQuote[]> {
   return [...bySymbol.values()];
 }
 
-export async function getMarketList(userId: string): Promise<{
+/** Chart from our own price history — avoids Twelve Data time_series (burns quota). */
+export async function getPriceHistory(
+  symbol: string,
+  limit = 48,
+): Promise<{ datetime: string; close: number }[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("stock_prices")
+    .select("price, recorded_at")
+    .eq("symbol", symbol.toUpperCase())
+    .order("recorded_at", { ascending: true })
+    .limit(limit);
+
+  return (data ?? [])
+    .map((row) => ({
+      datetime: row.recorded_at,
+      close: Number(row.price),
+    }))
+    .filter((row) => Number.isFinite(row.close) && row.close > 0);
+}
+
+export async function getMarketList(
+  userId: string,
+  preloadedQuotes?: MarketQuote[],
+): Promise<{
   stocks: StockListItem[];
   marketLabel: string;
   isOpen: boolean;
 }> {
   const supabase = await createClient();
-  const quotes = await ensureFreshPrices();
+  const quotes = preloadedQuotes ?? (await ensureFreshPrices());
   const quoteMap = new Map(quotes.map((q) => [q.symbol, q]));
 
   const [{ data: symbols }, { data: favorites }] = await Promise.all([
@@ -145,9 +180,10 @@ export async function getMarketList(userId: string): Promise<{
 
 export async function getPortfolioHoldings(
   userId: string,
+  preloadedQuotes?: MarketQuote[],
 ): Promise<PortfolioHolding[]> {
   const supabase = await createClient();
-  const quotes = await ensureFreshPrices();
+  const quotes = preloadedQuotes ?? (await ensureFreshPrices());
   const quoteMap = new Map(quotes.map((q) => [q.symbol, q.price]));
 
   const { data } = await supabase
@@ -180,7 +216,7 @@ export async function getPortfolioHoldings(
 
 export async function getStockDetail(symbol: string, userId: string) {
   const supabase = await createClient();
-  await ensureFreshPrices();
+  // Caller should have refreshed prices when needed; don't force API here.
 
   const [{ data: meta }, { data: price }, { data: favorite }, { data: holding }] =
     await Promise.all([

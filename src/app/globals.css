@@ -125,6 +125,15 @@ body {
   text-wrap: balance;
 }
 
+@keyframes nav-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 /* Mobile-first helpers */
 .page-pad {
   padding-left: max(1.25rem, env(safe-area-inset-left));
