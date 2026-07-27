@@ -69,9 +69,6 @@ export function LiveQuoteBlock({
       >
         {up ? "+" : ""}
         {cmp.changePercent.toFixed(2)}%
-        <span className="ml-1 text-[10px] font-normal text-muted-foreground">
-          gün
-        </span>
       </p>
     </div>
   );
