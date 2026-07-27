@@ -15,20 +15,33 @@ export function istanbulYearMonth(date: Date = new Date()): string {
   return istanbulYmd(date).slice(0, 7);
 }
 
+function parseYmd(ymd: string): { y: number; m: number; d: number } {
+  const parts = ymd.split("-");
+  const y = Number(parts[0]);
+  const m = Number(parts[1]);
+  const d = Number(parts[2]);
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) {
+    const now = istanbulYmd();
+    return parseYmd(now);
+  }
+  return { y, m, d };
+}
+
 /** ISO week key like 2026-W31 in Turkey calendar. */
 export function istanbulWeekKey(date: Date = new Date()): string {
-  const ymd = istanbulYmd(date);
-  const [y, m, d] = ymd.split("-").map(Number);
+  const { y, m, d } = parseYmd(istanbulYmd(date));
   const utc = new Date(Date.UTC(y, m - 1, d));
   const dayNum = utc.getUTCDay() || 7;
   utc.setUTCDate(utc.getUTCDate() + 4 - dayNum);
   const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
-  const week = Math.ceil(((utc.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  const week = Math.ceil(
+    ((utc.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
+  );
   return `${utc.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 }
 
 export function shiftIstanbulYmd(ymd: string, dayDelta: number): string {
-  const [y, m, d] = ymd.split("-").map(Number);
+  const { y, m, d } = parseYmd(ymd);
   const utc = new Date(Date.UTC(y, m - 1, d + dayDelta));
   return utc.toISOString().slice(0, 10);
 }
@@ -40,15 +53,15 @@ export function previousIstanbulYmd(date: Date = new Date()): string {
 export function previousIstanbulWeekKey(date: Date = new Date()): string {
   const today = istanbulYmd(date);
   const weekAgo = shiftIstanbulYmd(today, -7);
-  const [y, m, d] = weekAgo.split("-").map(Number);
+  const { y, m, d } = parseYmd(weekAgo);
   return istanbulWeekKey(new Date(Date.UTC(y, m - 1, d, 12)));
 }
 
 export function previousIstanbulYearMonth(date: Date = new Date()): string {
-  const ym = istanbulYearMonth(date);
-  const [y, m] = ym.split("-").map(Number);
-  const prev = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, "0")}`;
-  return prev;
+  const { y, m } = parseYmd(`${istanbulYearMonth(date)}-01`);
+  return m === 1
+    ? `${y - 1}-12`
+    : `${y}-${String(m - 1).padStart(2, "0")}`;
 }
 
 export function average(values: number[]): number | null {
