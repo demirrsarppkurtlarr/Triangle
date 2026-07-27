@@ -373,6 +373,71 @@ export type Database = {
         Update: Record<string, unknown>;
         Relationships: [];
       };
+      daily_reward_claims: {
+        Row: {
+          id: string;
+          user_id: string;
+          claim_date: string;
+          amount: number;
+          streak: number;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      user_preferences: {
+        Row: {
+          user_id: string;
+          locale: string;
+          email_notifications: boolean;
+          transfer_notifications: boolean;
+          market_notifications: boolean;
+          showcase_vehicle_id: string | null;
+          showcase_property_id: string | null;
+          showcase_gadget_id: string | null;
+          showcase_collectible_id: string | null;
+          updated_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      transfer_contacts: {
+        Row: {
+          id: string;
+          user_id: string;
+          contact_user_id: string;
+          transfer_count: number;
+          last_transfer_at: string;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      market_news: {
+        Row: {
+          id: string;
+          slug: string;
+          title_en: string;
+          title_tr: string;
+          body_en: string;
+          body_tr: string;
+          sentiment: string;
+          impact_percent: number;
+          symbols: string[];
+          published_at: string;
+          expires_at: string | null;
+          is_active: boolean;
+          applied_at: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -467,6 +532,89 @@ export type Database = {
           p_listing_id: string;
         };
         Returns: Json;
+      };
+      ensure_user_preferences: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      get_daily_reward_status: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      claim_daily_reward: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      get_leaderboard: {
+        Args: {
+          p_limit?: number;
+        };
+        Returns: {
+          rank: number;
+          user_id: string;
+          username: string;
+          triangle_id: string;
+          cash: number;
+          portfolio_value: number;
+          inventory_value: number;
+          net_worth: number;
+        }[];
+      };
+      apply_market_news: {
+        Args: {
+          p_news_id?: string | null;
+        };
+        Returns: Json;
+      };
+      upsert_transfer_contact: {
+        Args: {
+          p_user_id: string;
+          p_contact_user_id: string;
+        };
+        Returns: undefined;
+      };
+      equip_showcase_item: {
+        Args: {
+          p_slot: string;
+          p_item_id: string | null;
+        };
+        Returns: Json;
+      };
+      update_user_preferences: {
+        Args: {
+          p_locale?: string | null;
+          p_email_notifications?: boolean | null;
+          p_transfer_notifications?: boolean | null;
+          p_market_notifications?: boolean | null;
+        };
+        Returns: Json;
+      };
+      admin_upsert_market_news: {
+        Args: {
+          p_slug: string;
+          p_title_en: string;
+          p_title_tr: string;
+          p_body_en: string;
+          p_body_tr: string;
+          p_sentiment: string;
+          p_impact_percent: number;
+          p_symbols: string[];
+        };
+        Returns: string;
+      };
+      admin_set_game_item_active: {
+        Args: {
+          p_item_id: string;
+          p_is_active: boolean;
+        };
+        Returns: undefined;
+      };
+      admin_update_economy_setting: {
+        Args: {
+          p_key: string;
+          p_value: Json;
+        };
+        Returns: undefined;
       };
     };
     Enums: Record<string, never>;
