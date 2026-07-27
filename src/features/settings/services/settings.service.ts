@@ -29,7 +29,11 @@ export async function getUserPreferences(
   userId: string,
 ): Promise<UserPreferences> {
   const supabase = await createClient();
-  await supabase.rpc("ensure_user_preferences").catch(() => null);
+  try {
+    await supabase.rpc("ensure_user_preferences");
+  } catch {
+    // Table may not exist until phase-17 SQL is applied
+  }
 
   const { data } = await supabase
     .from("user_preferences")
