@@ -26,7 +26,7 @@ export const snappySpring: Transition = {
 export const appleEase = [0.22, 1, 0.36, 1] as const;
 
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 22 },
+  hidden: { opacity: 0.92, y: 14 },
   show: {
     opacity: 1,
     y: 0,
@@ -82,7 +82,7 @@ export const staggerFast: Variants = {
 };
 
 export const listItem: Variants = {
-  hidden: { opacity: 0, y: 14, scale: 0.98 },
+  hidden: { opacity: 0.9, y: 12, scale: 0.985 },
   show: {
     opacity: 1,
     y: 0,

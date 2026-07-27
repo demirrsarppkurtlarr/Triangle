@@ -177,7 +177,7 @@ export function TransferForm({
 
       <Button
         type="submit"
-        className="w-full"
+        className="w-full transition-transform duration-300 hover:-translate-y-0.5 active:scale-[0.98]"
         disabled={
           isPending ||
           !recipientId ||

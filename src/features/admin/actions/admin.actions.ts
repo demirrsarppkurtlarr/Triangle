@@ -32,13 +32,10 @@ const limitsSchema = z.object({
   daily_limit: z.coerce.number().positive().max(10_000_000),
 });
 
-function revalidateAdmin() {
-  revalidatePath("/admin");
-  revalidatePath("/admin/users");
-  revalidatePath("/admin/transfers");
-  revalidatePath("/admin/limits");
-  revalidatePath("/admin/logs");
-  revalidatePath("/dashboard");
+function revalidateAdmin(paths: string[] = ["/admin", "/admin/users"]) {
+  for (const path of paths) {
+    revalidatePath(path);
+  }
 }
 
 export async function adminMintAction(
@@ -68,7 +65,7 @@ export async function adminMintAction(
 
   if (error) return { error: error.message };
 
-  revalidateAdmin();
+  revalidateAdmin(["/admin", "/admin/users", "/admin/logs"]);
   return {
     success: `Minted $${parsed.data.amount.toFixed(2)} to ${parsed.data.triangle_id}`,
   };
@@ -99,7 +96,7 @@ export async function adminFreezeAction(
 
   if (error) return { error: error.message };
 
-  revalidateAdmin();
+  revalidateAdmin(["/admin/users", "/admin/logs"]);
   return { success: `Frozen ${parsed.data.triangle_id}` };
 }
 
@@ -124,7 +121,7 @@ export async function adminUnfreezeAction(
 
   if (error) return { error: error.message };
 
-  revalidateAdmin();
+  revalidateAdmin(["/admin/users", "/admin/logs"]);
   return { success: `Unfrozen ${triangleId}` };
 }
 
@@ -171,7 +168,6 @@ export async function adminUpdateLimitsAction(
 
   if (dailyError) return { error: dailyError.message };
 
-  revalidateAdmin();
-  revalidatePath("/transfer");
+  revalidateAdmin(["/admin/limits", "/transfer"]);
   return { success: "Transfer limits updated" };
 }

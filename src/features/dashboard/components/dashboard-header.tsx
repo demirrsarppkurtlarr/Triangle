@@ -1,5 +1,9 @@
+"use client";
+
 import { signOutAction } from "@/features/auth/actions/auth.actions";
-import { Button } from "@/components/ui/button";
+import { MotionButton } from "@/components/motion/motion-button";
+import { motion, useReducedMotion } from "framer-motion";
+import { softSpring } from "@/lib/motion";
 
 type DashboardHeaderProps = {
   title: string;
@@ -12,10 +16,17 @@ export function DashboardHeader({
   description,
   username,
 }: DashboardHeaderProps) {
+  const reduce = useReducedMotion();
+
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-card/70 backdrop-blur-xl supports-[backdrop-filter]:bg-card/50">
       <div className="page-pad mx-auto flex max-w-6xl items-start justify-between gap-3 py-4 md:items-center md:py-5">
-        <div className="min-w-0 flex-1">
+        <motion.div
+          className="min-w-0 flex-1"
+          initial={reduce ? false : { opacity: 0.94, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={softSpring}
+        >
           <h1 className="truncate text-xl font-semibold tracking-tight md:text-3xl">
             {title}
           </h1>
@@ -27,11 +38,11 @@ export function DashboardHeader({
           {username && (
             <p className="mt-1 text-xs text-muted-foreground">@{username}</p>
           )}
-        </div>
+        </motion.div>
         <form action={signOutAction} className="hidden shrink-0 md:block">
-          <Button variant="outline" size="sm" type="submit">
+          <MotionButton variant="outline" size="sm" type="submit">
             Sign out
-          </Button>
+          </MotionButton>
         </form>
       </div>
     </header>

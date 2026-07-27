@@ -1,8 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { ActionFeedback } from "@/components/motion/action-feedback";
+import { MotionButton } from "@/components/motion/motion-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -22,6 +24,11 @@ export function LimitsForm({ singleLimit, dailyLimit }: LimitsFormProps) {
     adminUpdateLimitsAction,
     initialState,
   );
+
+  useEffect(() => {
+    if (state.success) toast.success(state.success);
+    if (state.error) toast.error(state.error);
+  }, [state.success, state.error]);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -49,19 +56,10 @@ export function LimitsForm({ singleLimit, dailyLimit }: LimitsFormProps) {
           required
         />
       </div>
-      {state.error && (
-        <p className="rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {state.error}
-        </p>
-      )}
-      {state.success && (
-        <p className="rounded-xl bg-success/10 px-4 py-3 text-sm text-success">
-          {state.success}
-        </p>
-      )}
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "Saving..." : "Save limits"}
-      </Button>
+      <ActionFeedback error={state.error} success={state.success} />
+      <MotionButton type="submit" pending={isPending} pendingLabel="Saving...">
+        Save limits
+      </MotionButton>
     </form>
   );
 }

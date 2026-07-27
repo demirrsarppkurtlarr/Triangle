@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { MotionButton } from "@/components/motion/motion-button";
 import {
   adminFreezeAction,
   adminUnfreezeAction,
@@ -22,6 +23,7 @@ export function FreezeControls({
   isFrozen,
   isAdminUser,
 }: FreezeControlsProps) {
+  const [frozen, setFrozen] = useState(isFrozen);
   const [freezeState, freezeAction, freezePending] = useActionState(
     adminFreezeAction,
     initialState,
@@ -31,39 +33,48 @@ export function FreezeControls({
     initialState,
   );
 
+  useEffect(() => {
+    setFrozen(isFrozen);
+  }, [isFrozen]);
+
+  useEffect(() => {
+    if (freezeState.success) {
+      setFrozen(true);
+      toast.success(freezeState.success);
+    }
+    if (freezeState.error) toast.error(freezeState.error);
+  }, [freezeState.success, freezeState.error]);
+
+  useEffect(() => {
+    if (unfreezeState.success) {
+      setFrozen(false);
+      toast.success(unfreezeState.success);
+    }
+    if (unfreezeState.error) toast.error(unfreezeState.error);
+  }, [unfreezeState.success, unfreezeState.error]);
+
   if (isAdminUser) {
-    return (
-      <span className="text-xs text-muted-foreground">Protected</span>
-    );
+    return <span className="text-xs text-muted-foreground">Protected</span>;
   }
 
-  const state = isFrozen ? unfreezeState : freezeState;
-  const pending = isFrozen ? unfreezePending : freezePending;
+  const pending = frozen ? unfreezePending : freezePending;
 
   return (
-    <form action={isFrozen ? unfreezeAction : freezeAction}>
+    <form action={frozen ? unfreezeAction : freezeAction}>
       <input type="hidden" name="triangle_id" value={triangleId} />
-      {!isFrozen && (
+      {!frozen && (
         <input type="hidden" name="reason" value="Admin freeze" />
       )}
-      <Button
+      <MotionButton
         type="submit"
         size="sm"
-        variant={isFrozen ? "outline" : "destructive"}
-        disabled={pending}
+        variant={frozen ? "outline" : "destructive"}
+        pending={pending}
+        pendingLabel="…"
+        className="min-w-[5.5rem]"
       >
-        {pending
-          ? "..."
-          : isFrozen
-            ? "Unfreeze"
-            : "Freeze"}
-      </Button>
-      {state.error && (
-        <p className="mt-1 text-xs text-destructive">{state.error}</p>
-      )}
-      {state.success && (
-        <p className="mt-1 text-xs text-success">{state.success}</p>
-      )}
+        {frozen ? "Unfreeze" : "Freeze"}
+      </MotionButton>
     </form>
   );
 }

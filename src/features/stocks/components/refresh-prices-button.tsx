@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { MotionButton } from "@/components/motion/motion-button";
 import { refreshMarketPricesFormAction } from "@/features/stocks/actions/refresh.action";
 import type { StockActionState } from "@/features/stocks/actions/stock.actions";
 
@@ -19,18 +20,23 @@ export function RefreshPricesButton({ className }: RefreshPricesButtonProps) {
     initialState,
   );
 
+  useEffect(() => {
+    if (state.success) toast.success(state.success);
+    if (state.error) toast.error(state.error);
+  }, [state.success, state.error]);
+
   return (
     <form action={formAction} className={className}>
-      <Button type="submit" variant="outline" size="sm" disabled={isPending}>
-        <RefreshCw className={`size-4 ${isPending ? "animate-spin" : ""}`} />
-        {isPending ? "Refreshing..." : "Refresh prices"}
-      </Button>
-      {state.error && (
-        <p className="mt-2 text-xs text-destructive">{state.error}</p>
-      )}
-      {state.success && (
-        <p className="mt-2 text-xs text-success">{state.success}</p>
-      )}
+      <MotionButton
+        type="submit"
+        variant="outline"
+        size="sm"
+        pending={isPending}
+        pendingLabel="Refreshing..."
+      >
+        <RefreshCw className="size-4" />
+        Refresh prices
+      </MotionButton>
     </form>
   );
 }
