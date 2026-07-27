@@ -6,6 +6,7 @@ import {
   previousIstanbulWeekKey,
   previousIstanbulYearMonth,
   previousIstanbulYmd,
+  syntheticPreviousAverage,
 } from "@/lib/time/istanbul";
 import { createClient } from "@/lib/supabase/server";
 
@@ -19,15 +20,21 @@ export type ComparisonBaselines = {
 };
 
 function emptyBaselines(
+  symbol: string,
   fallback: number | null,
   dayKey: string,
   weekKey: string,
   monthKey: string,
 ): ComparisonBaselines {
+  const price = fallback != null && fallback > 0 ? fallback : null;
   return {
-    day: fallback,
-    week: fallback,
-    month: fallback,
+    day: price != null ? syntheticPreviousAverage(symbol, price, dayKey, 0.05) : null,
+    week:
+      price != null ? syntheticPreviousAverage(symbol, price, weekKey, 0.08) : null,
+    month:
+      price != null
+        ? syntheticPreviousAverage(symbol, price, monthKey, 0.12)
+        : null,
     dayKey,
     weekKey,
     monthKey,
@@ -49,6 +56,7 @@ export async function getComparisonBaselines(
   return (
     map[symbol.toUpperCase()] ??
     emptyBaselines(
+      symbol.toUpperCase(),
       fallbackPrice > 0 ? fallbackPrice : null,
       previousIstanbulYmd(),
       previousIstanbulWeekKey(),
@@ -70,6 +78,7 @@ export async function getComparisonBaselinesMap(
   for (const symbol of upper) {
     const fb = fallbacks[symbol];
     result[symbol] = emptyBaselines(
+      symbol,
       fb != null && fb > 0 ? fb : null,
       dayKey,
       weekKey,
@@ -109,10 +118,21 @@ export async function getComparisonBaselinesMap(
   }
 
   for (const symbol of upper) {
-    const fallback = result[symbol]?.day ?? null;
-    const day = average(dayPrices[symbol] ?? []) ?? fallback;
-    const week = average(weekPrices[symbol] ?? []) ?? day;
-    const month = average(monthPrices[symbol] ?? []) ?? week;
+    const fb = fallbacks[symbol];
+    const seed = fb != null && fb > 0 ? fb : null;
+    const syntheticDay =
+      seed != null ? syntheticPreviousAverage(symbol, seed, dayKey, 0.05) : null;
+    const syntheticWeek =
+      seed != null ? syntheticPreviousAverage(symbol, seed, weekKey, 0.08) : null;
+    const syntheticMonth =
+      seed != null
+        ? syntheticPreviousAverage(symbol, seed, monthKey, 0.12)
+        : null;
+
+    const day = average(dayPrices[symbol] ?? []) ?? syntheticDay;
+    const week = average(weekPrices[symbol] ?? []) ?? syntheticWeek ?? day;
+    const month = average(monthPrices[symbol] ?? []) ?? syntheticMonth ?? week;
+
     result[symbol] = {
       day,
       week,

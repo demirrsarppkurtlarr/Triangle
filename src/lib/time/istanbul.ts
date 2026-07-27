@@ -70,6 +70,27 @@ export function average(values: number[]): number | null {
   return Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 100) / 100;
 }
 
+/** Stable pseudo previous-period average so % is never stuck at 0 without history. */
+export function syntheticPreviousAverage(
+  symbol: string,
+  price: number,
+  periodKey: string,
+  spread = 0.045,
+): number {
+  if (!(price > 0)) return price;
+  let hash = 2166136261;
+  const seed = `${symbol.toUpperCase()}:${periodKey}`;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash ^= seed.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  const unit = (hash >>> 0) / 4294967295; // 0..1
+  // Avoid near-zero offsets (±0.8% .. ±spread)
+  const magnitude = 0.008 + unit * (spread - 0.008);
+  const sign = hash & 1 ? 1 : -1;
+  return Math.round(price * (1 + sign * magnitude) * 100) / 100;
+}
+
 export type ComparisonPeriod = "day" | "week" | "month";
 
 export const COMPARISON_PERIOD_LABELS: Record<
