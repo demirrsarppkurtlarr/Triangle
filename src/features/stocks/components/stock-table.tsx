@@ -6,15 +6,21 @@ import { useEffect, useState } from "react";
 
 import { LiveQuoteBlock } from "@/features/stocks/components/live-price";
 import { toggleFavoriteAction } from "@/features/stocks/actions/stock.actions";
+import type { ServerBaselines } from "@/features/stocks/hooks/use-comparison-baseline";
 import type { StockListItem } from "@/features/stocks/services/market.service";
 import { cn } from "@/lib/utils";
 
 type StockTableProps = {
   stocks: StockListItem[];
   favoritesOnly?: boolean;
+  baselinesBySymbol?: Record<string, ServerBaselines>;
 };
 
-export function StockTable({ stocks, favoritesOnly = false }: StockTableProps) {
+export function StockTable({
+  stocks,
+  favoritesOnly = false,
+  baselinesBySymbol = {},
+}: StockTableProps) {
   const rows = favoritesOnly ? stocks.filter((s) => s.isFavorite) : stocks;
 
   if (rows.length === 0) {
@@ -31,14 +37,23 @@ export function StockTable({ stocks, favoritesOnly = false }: StockTableProps) {
     <ul className="space-y-2.5">
       {rows.map((stock) => (
         <li key={stock.symbol}>
-          <StockHitTarget stock={stock} />
+          <StockHitTarget
+            stock={stock}
+            baselines={baselinesBySymbol[stock.symbol]}
+          />
         </li>
       ))}
     </ul>
   );
 }
 
-function StockHitTarget({ stock }: { stock: StockListItem }) {
+function StockHitTarget({
+  stock,
+  baselines,
+}: {
+  stock: StockListItem;
+  baselines?: ServerBaselines;
+}) {
   const [favorite, setFavorite] = useState(stock.isFavorite);
 
   useEffect(() => {
@@ -61,7 +76,9 @@ function StockHitTarget({ stock }: { stock: StockListItem }) {
         </div>
 
         <LiveQuoteBlock
+          symbol={stock.symbol}
           basePrice={stock.price}
+          baselines={baselines}
           className="shrink-0 text-right"
         />
 

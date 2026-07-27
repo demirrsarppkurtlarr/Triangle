@@ -2,16 +2,16 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import {
+  useComparisonBaseline,
+  type ServerBaselines,
+} from "@/features/stocks/hooks/use-comparison-baseline";
+import { useLiveQuote } from "@/features/stocks/hooks/use-live-market";
 import { formatCurrency } from "@/utils/format";
 import { cn } from "@/lib/utils";
-import {
-  useLivePrices,
-  useLiveQuote,
-  type LiveQuote,
-} from "@/features/stocks/hooks/use-live-market";
 
-export type { LiveQuote };
 export { useLivePrices, useLiveQuote } from "@/features/stocks/hooks/use-live-market";
+export type { LiveQuote } from "@/features/stocks/hooks/use-live-market";
 
 export function useLivePrice(basePrice: number): number {
   return useLiveQuote(basePrice).price;
@@ -29,18 +29,29 @@ export function LivePrice({ value, className }: LivePriceProps) {
 }
 
 type LiveQuoteBlockProps = {
+  symbol: string;
   basePrice: number;
+  baselines?: ServerBaselines;
   className?: string;
   changeClassName?: string;
 };
 
+/** Market list: always vs previous Turkey day average. */
 export function LiveQuoteBlock({
+  symbol,
   basePrice,
+  baselines,
   className,
   changeClassName,
 }: LiveQuoteBlockProps) {
-  const { price, changePercent } = useLiveQuote(basePrice);
-  const up = changePercent >= 0;
+  const { price } = useLiveQuote(basePrice);
+  const cmp = useComparisonBaseline(
+    symbol,
+    price,
+    baselines ?? { day: null, week: null, month: null },
+    "day",
+  );
+  const up = cmp.changePercent >= 0;
 
   if (!(basePrice > 0)) {
     return <span className={className}>—</span>;
@@ -57,7 +68,10 @@ export function LiveQuoteBlock({
         )}
       >
         {up ? "+" : ""}
-        {changePercent.toFixed(2)}%
+        {cmp.changePercent.toFixed(2)}%
+        <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+          gün
+        </span>
       </p>
     </div>
   );

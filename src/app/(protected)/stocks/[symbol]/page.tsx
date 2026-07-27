@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { DashboardHeader } from "@/features/dashboard/components/dashboard-header";
 import { StockDetailLive } from "@/features/stocks/components/stock-detail-live";
+import { getComparisonBaselines } from "@/features/stocks/services/comparison.service";
 import {
   getPriceHistory,
   getStockDetail,
@@ -28,13 +29,14 @@ export default async function StockDetailPage({ params }: StockDetailPageProps) 
   const detail = await getStockDetail(symbol, user.id);
   if (!detail) notFound();
 
-  const [{ data: account }, chartData] = await Promise.all([
+  const [{ data: account }, chartData, baselines] = await Promise.all([
     supabase
       .from("bank_accounts")
       .select("balance")
       .eq("user_id", user.id)
       .single(),
-    getPriceHistory(symbol),
+    getPriceHistory(symbol, 120),
+    getComparisonBaselines(symbol, detail.price),
   ]);
 
   return (
@@ -53,6 +55,11 @@ export default async function StockDetailPage({ params }: StockDetailPageProps) 
           chartData={chartData}
           availableCash={Number(account?.balance ?? 0)}
           holding={detail.holding}
+          baselines={{
+            day: baselines.day,
+            week: baselines.week,
+            month: baselines.month,
+          }}
         />
       </main>
     </>

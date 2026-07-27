@@ -12,6 +12,7 @@ import {
   getPortfolioHoldings,
   ensureFreshPrices,
 } from "@/features/stocks/services/market.service";
+import { getComparisonBaselinesMap } from "@/features/stocks/services/comparison.service";
 import {
   Card,
   CardContent,
@@ -35,6 +36,11 @@ export default async function StocksPage() {
     getMarketList(user.id, quotes),
     getPortfolioHoldings(user.id, quotes),
   ]);
+
+  const baselinesBySymbol = await getComparisonBaselinesMap(
+    stocks.map((s) => s.symbol),
+    Object.fromEntries(stocks.map((s) => [s.symbol, s.price])),
+  );
 
   return (
     <>
@@ -86,10 +92,10 @@ export default async function StocksPage() {
                   Watchlist
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Tap a symbol to buy or sell with virtual cash
+                  % önceki gün ortalamasına göre · TR saati
                 </p>
               </div>
-              <StockTable stocks={stocks} />
+              <StockTable stocks={stocks} baselinesBySymbol={baselinesBySymbol} />
             </section>
 
             <section className="space-y-3">
@@ -101,7 +107,11 @@ export default async function StocksPage() {
                   Star symbols to keep them close
                 </p>
               </div>
-              <StockTable stocks={stocks} favoritesOnly />
+              <StockTable
+                stocks={stocks}
+                favoritesOnly
+                baselinesBySymbol={baselinesBySymbol}
+              />
             </section>
           </div>
 
