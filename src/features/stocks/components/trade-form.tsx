@@ -10,6 +10,7 @@ import {
   sellStockAction,
   type StockActionState,
 } from "@/features/stocks/actions/stock.actions";
+import { LivePrice } from "@/features/stocks/components/live-price";
 import { formatCurrency } from "@/utils/format";
 
 const initialState: StockActionState = {};
@@ -52,9 +53,12 @@ export function TradeForm({
           required
         />
         <p className="text-xs text-muted-foreground">
+          Live quote{" "}
+          <LivePrice value={price} className="font-medium text-foreground" />
+          {" · "}
           {side === "buy"
-            ? `Cash ${formatCurrency(availableCash)} · ~${maxBuy.toFixed(4)} shares max`
-            : `You own ${ownedQuantity} shares`}
+            ? `cash ${formatCurrency(availableCash)} · ~${maxBuy.toFixed(4)} max`
+            : `you own ${ownedQuantity}`}
         </p>
       </div>
 

@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 
 import { refreshMarketPricesAction } from "@/features/stocks/actions/stock.actions";
 
-const TICK_MS = 4000;
+/** Persist a real random-walk tick to the DB while the market page is open. */
+const SERVER_TICK_MS = 3000;
 
-/** Quietly advances the simulated market every few seconds while the page is open. */
 export function MarketAutoTick() {
   const router = useRouter();
   const busy = useRef(false);
@@ -26,7 +26,8 @@ export function MarketAutoTick() {
       }
     }
 
-    const id = window.setInterval(tick, TICK_MS);
+    void tick();
+    const id = window.setInterval(tick, SERVER_TICK_MS);
     return () => {
       cancelled = true;
       window.clearInterval(id);

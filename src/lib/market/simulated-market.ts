@@ -49,13 +49,13 @@ export function getMarketStatus(): {
 } {
   return {
     isOpen: true,
-    label: "Simulated · updates every few seconds",
+    label: "Simulated · live every 0.5s",
   };
 }
 
-/** Soft client-side pulse around a server price (±0.15%) for visual life between ticks. */
+/** Soft client-side pulse around a server price for visual life between ticks. */
 export function pulsePrice(price: number, seed = Date.now()): number {
   if (!Number.isFinite(price) || price <= 0) return price;
-  const wave = Math.sin(seed / 900) * 0.0015;
+  const wave = Math.sin(seed / 500) * 0.002;
   return Math.round(price * (1 + wave) * 100) / 100;
 }

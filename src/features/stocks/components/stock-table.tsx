@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { useTransition } from "react";
 
-import { AnimatedCurrency } from "@/components/motion/animated-currency";
+import { LivePrice } from "@/features/stocks/components/live-price";
 import { Stagger, StaggerItem } from "@/components/motion/stagger";
 import { toggleFavoriteAction } from "@/features/stocks/actions/stock.actions";
 import type { StockListItem } from "@/features/stocks/services/market.service";
@@ -77,11 +77,7 @@ function StockCard({ stock }: { stock: StockListItem }) {
             </div>
             <div className="shrink-0 text-right">
               <p className="font-semibold">
-                {stock.price > 0 ? (
-                  <AnimatedCurrency value={stock.price} />
-                ) : (
-                  "—"
-                )}
+                <LivePrice value={stock.price} />
               </p>
               <p
                 className={cn(
@@ -134,7 +130,7 @@ function StockRow({ stock }: { stock: StockListItem }) {
         <p className="text-xs text-muted-foreground">{stock.name}</p>
       </td>
       <td className="px-4 py-3 font-medium">
-        {stock.price > 0 ? <AnimatedCurrency value={stock.price} /> : "—"}
+        <LivePrice value={stock.price} />
       </td>
       <td
         className={cn(
