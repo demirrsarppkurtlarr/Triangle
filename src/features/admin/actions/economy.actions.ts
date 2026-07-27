@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAdmin } from "@/features/admin/services/admin-auth.service";
 import { createClient } from "@/lib/supabase/server";
+import type { Json } from "@/types/database";
 
 export type AdminEconomyActionState = {
   error?: string;
@@ -29,7 +30,7 @@ export async function adminUpdateEconomySettingAction(
   const key = formData.get("key")?.toString() ?? "";
   const kind = formData.get("kind")?.toString() ?? "amount";
 
-  let value: Record<string, unknown>;
+  let value: Json;
 
   if (kind === "toggle") {
     value = { enabled: formData.get("enabled") === "true" };
