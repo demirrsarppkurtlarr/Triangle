@@ -6,6 +6,7 @@ import {
   ArrowLeftRight,
   Bell,
   Briefcase,
+  CircleDollarSign,
   Gift,
   Home,
   Newspaper,
@@ -42,6 +43,7 @@ export function AppNav({
 
   const baseNavItems = [
     { href: "/dashboard", label: t.nav.home, icon: Home },
+    { href: "/earn", label: "Kazanç", icon: CircleDollarSign },
     { href: "/rewards", label: t.nav.rewards, icon: Gift },
     { href: "/shop", label: t.nav.shop, icon: ShoppingBag },
     { href: "/inventory", label: t.nav.inventory, icon: Package },
@@ -56,14 +58,14 @@ export function AppNav({
   ];
 
   const navItems = [
-    ...baseNavItems.slice(0, 8),
+    ...baseNavItems.slice(0, 9),
     ...(isAdmin ? [{ href: "/admin", label: t.nav.admin, icon: Shield }] : []),
-    ...baseNavItems.slice(8),
+    ...baseNavItems.slice(9),
   ];
 
   const mobileItems = [
     { href: "/dashboard", label: t.nav.home, icon: Home },
-    { href: "/rewards", label: t.nav.rewards, icon: Gift },
+    { href: "/earn", label: "Kazanç", icon: CircleDollarSign },
     { href: "/stocks", label: t.nav.market, icon: TrendingUp },
     { href: "/leaderboard", label: t.nav.leaderboard, icon: Trophy },
     {
@@ -82,6 +84,7 @@ export function AppNav({
     if (href === "/marketplace") return pathname.startsWith("/marketplace");
     if (href === "/notifications") return pathname.startsWith("/notifications");
     if (href === "/rewards") return pathname.startsWith("/rewards");
+    if (href === "/earn") return pathname.startsWith("/earn");
     if (href === "/leaderboard") return pathname.startsWith("/leaderboard");
     if (href === "/news") return pathname.startsWith("/news");
     if (href === "/settings") return pathname.startsWith("/settings");

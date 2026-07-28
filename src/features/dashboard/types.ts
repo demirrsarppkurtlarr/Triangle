@@ -9,7 +9,12 @@ export type TransactionType =
   | "game_purchase"
   | "game_sale"
   | "item_trade"
-  | "daily_reward";
+  | "daily_reward"
+  | "interest"
+  | "rent"
+  | "job_pay"
+  | "lottery"
+  | "quest_reward";
 
 export type TransactionStatus =
   | "pending"
@@ -30,7 +35,8 @@ export type NotificationType =
   | "system"
   | "game_item"
   | "daily_reward"
-  | "market_news";
+  | "market_news"
+  | "income";
 
 export type DashboardProfile = {
   id: string;

@@ -108,8 +108,9 @@ function HoldingCard({
               {holding.symbol}
             </p>
             <p className="text-xs text-muted-foreground">
-              {holding.quantity} shares · avg{" "}
-              {formatCurrency(holding.averageCost)}
+              {holding.quantity} hisse · maliyet{" "}
+              {formatCurrency(holding.averageCost)} · şimdi{" "}
+              {formatCurrency(holding.price)}
             </p>
           </div>
         </Link>

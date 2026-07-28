@@ -2,6 +2,19 @@
 
 You already ran `full_schema.sql`. **Do not re-run it.**
 
+## Phase 18 — Income + calmer global market (required for earn hub)
+
+Run this **once** in Supabase SQL Editor:
+
+```
+database/supabase/incremental/phase-18-income-market.sql
+```
+
+Adds:
+- Global quieter `tick_game_prices` + `spawn_market_news` (fresh headlines)
+- Bank interest, property rent, side jobs, lucky spin, daily quests
+- Cooldown / job tables
+
 ## Phase 17 — Engagement (required for new features)
 
 Run this **once** in Supabase SQL Editor:
@@ -53,3 +66,4 @@ Twelve Data is **no longer required**. Simulated prices only.
 | 9–15  | No new SQL | — |
 | 16    | Yes (once) | `incremental/phase-16-game-economy.sql` |
 | 17    | Yes (once) | `incremental/phase-17-engagement.sql` |
+| 18    | Yes (once) | `incremental/phase-18-income-market.sql` |

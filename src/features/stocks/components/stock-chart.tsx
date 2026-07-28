@@ -2,26 +2,41 @@
 
 import {
   CartesianGrid,
+  ComposedChart,
   Line,
-  LineChart,
   ResponsiveContainer,
+  Scatter,
   Tooltip,
   XAxis,
   YAxis,
+  ZAxis,
 } from "recharts";
 
 import { useLiveChartSeries } from "@/features/stocks/components/live-price";
+import type { TradeMarker } from "@/features/stocks/services/market.service";
 import { formatCurrency } from "@/utils/format";
 
 type StockChartProps = {
   data: { datetime: string; close: number }[];
   symbol: string;
-  /** Current live quote — chart extends on every tick. */
   livePrice: number;
+  markers?: TradeMarker[];
 };
 
-export function StockChart({ data, symbol, livePrice }: StockChartProps) {
+export function StockChart({
+  data,
+  symbol,
+  livePrice,
+  markers = [],
+}: StockChartProps) {
   const series = useLiveChartSeries(livePrice, data, 80);
+
+  const buyDots = markers
+    .filter((m) => m.side === "buy")
+    .map((m) => ({ datetime: m.datetime, close: m.price, qty: m.quantity }));
+  const sellDots = markers
+    .filter((m) => m.side === "sell")
+    .map((m) => ({ datetime: m.datetime, close: m.price, qty: m.quantity }));
 
   if (series.length === 0) {
     return (
@@ -32,18 +47,26 @@ export function StockChart({ data, symbol, livePrice }: StockChartProps) {
   }
 
   return (
-    <div className="h-56 w-full rounded-3xl border border-border/50 bg-card/60 p-4 shadow-soft">
-      <div className="mb-2 flex items-center justify-between gap-2">
+    <div className="h-64 w-full rounded-3xl border border-border/50 bg-card/60 p-4 shadow-soft">
+      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          {symbol} · Live tape
+          {symbol} · Global 10s tape
         </p>
-        <span className="inline-flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-[0.14em] text-success">
-          <span className="size-1.5 animate-pulse rounded-full bg-success" />
-          Live
-        </span>
+        <div className="flex items-center gap-3 text-[10px] font-medium uppercase tracking-[0.14em]">
+          <span className="inline-flex items-center gap-1.5 text-success">
+            <span className="size-1.5 animate-pulse rounded-full bg-success" />
+            Live
+          </span>
+          {buyDots.length > 0 && (
+            <span className="text-primary">● Buy</span>
+          )}
+          {sellDots.length > 0 && (
+            <span className="text-destructive">● Sell</span>
+          )}
+        </div>
       </div>
-      <ResponsiveContainer width="100%" height="90%">
-        <LineChart data={series}>
+      <ResponsiveContainer width="100%" height="88%">
+        <ComposedChart data={series}>
           <CartesianGrid
             strokeDasharray="3 3"
             stroke="hsl(var(--border))"
@@ -67,6 +90,7 @@ export function StockChart({ data, symbol, livePrice }: StockChartProps) {
             width={56}
             tickFormatter={(v: number) => `$${v}`}
           />
+          <ZAxis range={[80, 80]} />
           <Tooltip
             formatter={(value) => formatCurrency(Number(value))}
             labelFormatter={(label) =>
@@ -81,7 +105,25 @@ export function StockChart({ data, symbol, livePrice }: StockChartProps) {
             dot={false}
             isAnimationActive={false}
           />
-        </LineChart>
+          {buyDots.length > 0 && (
+            <Scatter
+              data={buyDots}
+              dataKey="close"
+              fill="#22C55E"
+              name="Buy"
+              isAnimationActive={false}
+            />
+          )}
+          {sellDots.length > 0 && (
+            <Scatter
+              data={sellDots}
+              dataKey="close"
+              fill="#EF4444"
+              name="Sell"
+              isAnimationActive={false}
+            />
+          )}
+        </ComposedChart>
       </ResponsiveContainer>
     </div>
   );

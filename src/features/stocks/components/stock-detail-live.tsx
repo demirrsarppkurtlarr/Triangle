@@ -32,6 +32,7 @@ type StockDetailLiveProps = {
   availableCash: number;
   holding: { quantity: number; averageCost: number } | null;
   baselines: ServerBaselines;
+  markers?: { datetime: string; price: number; quantity: number; side: "buy" | "sell" }[];
 };
 
 const PERIODS: ComparisonPeriod[] = ["day", "week", "month"];
@@ -45,11 +46,20 @@ export function StockDetailLive({
   availableCash,
   holding,
   baselines,
+  markers = [],
 }: StockDetailLiveProps) {
   const [period, setPeriod] = useState<ComparisonPeriod>("day");
   const quote = useLiveQuote(basePrice);
   const cmp = useComparisonBaseline(symbol, quote.price, baselines, period);
   const up = cmp.changePercent >= 0;
+  const holdingPnl =
+    holding && holding.quantity > 0
+      ? (quote.price - holding.averageCost) * holding.quantity
+      : 0;
+  const holdingPnlPct =
+    holding && holding.averageCost > 0
+      ? ((quote.price - holding.averageCost) / holding.averageCost) * 100
+      : 0;
 
   return (
     <div className="space-y-8">
@@ -101,19 +111,34 @@ export function StockDetailLive({
 
         {holding && (
           <div className="rounded-2xl bg-secondary/70 px-4 py-3 text-sm">
-            <p className="text-muted-foreground">You own</p>
+            <p className="text-muted-foreground">Pozisyon</p>
             <p className="font-semibold">
-              {holding.quantity} shares · avg{" "}
+              {holding.quantity} hisse · ort.{" "}
               {formatCurrency(holding.averageCost)}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Live value {formatCurrency(holding.quantity * quote.price)}
+              Değer {formatCurrency(holding.quantity * quote.price)}
+            </p>
+            <p
+              className={cn(
+                "mt-1 text-sm font-semibold tabular-nums",
+                holdingPnl >= 0 ? "text-success" : "text-destructive",
+              )}
+            >
+              {holdingPnl >= 0 ? "+" : ""}
+              {formatCurrency(holdingPnl)} ({holdingPnlPct >= 0 ? "+" : ""}
+              {holdingPnlPct.toFixed(2)}%)
             </p>
           </div>
         )}
       </div>
 
-      <StockChart data={chartData} symbol={symbol} livePrice={quote.price} />
+      <StockChart
+        data={chartData}
+        symbol={symbol}
+        livePrice={quote.price}
+        markers={markers}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="glass-panel border-border/50">

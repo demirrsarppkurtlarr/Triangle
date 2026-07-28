@@ -131,6 +131,7 @@ render.yaml           # Render Blueprint
 | 15 | ✅ Complete | Deployment |
 | 16 | ✅ Complete | Game economy (shop, inventory, marketplace) |
 | 17 | ✅ Complete | Engagement (daily reward, i18n, leaderboard, news, contacts, showcase, settings, admin economy) |
+| 18 | ✅ Complete | Global 10s market, live news spawn, earn hub (interest/rent/jobs/spin/quests), admin crash fix |
 
 ## Environment Variables
 

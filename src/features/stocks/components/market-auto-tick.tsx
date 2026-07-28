@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 import { tickMarketPricesSilentAction } from "@/features/stocks/actions/stock.actions";
+import { spawnMarketNewsSilentAction } from "@/features/market-news/actions/news.actions";
 
-/** Persist server ticks quietly — UI prices move on the client without remounting. */
-const SERVER_TICK_MS = 12_000;
+/** Global cadence: one shared tick every 10 seconds for all players. */
+const SERVER_TICK_MS = 10_000;
 
 export function MarketAutoTick() {
   const busy = useRef(false);
+  const router = useRouter();
 
   useEffect(() => {
     let cancelled = false;
@@ -17,7 +20,10 @@ export function MarketAutoTick() {
       if (busy.current || document.visibilityState !== "visible") return;
       busy.current = true;
       try {
-        if (!cancelled) await tickMarketPricesSilentAction();
+        if (cancelled) return;
+        await tickMarketPricesSilentAction();
+        await spawnMarketNewsSilentAction().catch(() => null);
+        if (!cancelled) router.refresh();
       } finally {
         busy.current = false;
       }
@@ -29,7 +35,7 @@ export function MarketAutoTick() {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, []);
+  }, [router]);
 
   return null;
 }

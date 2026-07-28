@@ -21,6 +21,11 @@ function getActivityTitle(type: TransactionType, direction: ActivityItem["direct
     game_sale: "Shop sale",
     item_trade: direction === "in" ? "Marketplace sale" : "Marketplace buy",
     daily_reward: "Daily reward",
+    interest: "Bank interest",
+    rent: "Property rent",
+    job_pay: "Job pay",
+    lottery: "Lucky spin",
+    quest_reward: "Quest reward",
   };
   return labels[type];
 }

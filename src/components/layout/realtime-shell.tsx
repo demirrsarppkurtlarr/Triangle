@@ -15,6 +15,7 @@ type RealtimeShellProps = {
 const APP_ROUTES = [
   "/dashboard",
   "/rewards",
+  "/earn",
   "/transfer",
   "/stocks",
   "/news",

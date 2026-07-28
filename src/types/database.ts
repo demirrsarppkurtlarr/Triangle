@@ -19,7 +19,12 @@ export type TransactionType =
   | "game_purchase"
   | "game_sale"
   | "item_trade"
-  | "daily_reward";
+  | "daily_reward"
+  | "interest"
+  | "rent"
+  | "job_pay"
+  | "lottery"
+  | "quest_reward";
 
 export type TransactionStatus =
   | "pending"
@@ -40,7 +45,8 @@ export type NotificationType =
   | "system"
   | "game_item"
   | "daily_reward"
-  | "market_news";
+  | "market_news"
+  | "income";
 
 export type Database = {
   public: {
@@ -438,6 +444,45 @@ export type Database = {
         Update: Record<string, unknown>;
         Relationships: [];
       };
+      income_cooldowns: {
+        Row: {
+          user_id: string;
+          kind: string;
+          last_at: string;
+          meta: Json;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      side_jobs: {
+        Row: {
+          id: string;
+          slug: string;
+          title_en: string;
+          title_tr: string;
+          pay_min: number;
+          pay_max: number;
+          duration_sec: number;
+          icon: string;
+          is_active: boolean;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      active_jobs: {
+        Row: {
+          user_id: string;
+          job_id: string;
+          started_at: string;
+          completes_at: string;
+          claimed: boolean;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -615,6 +660,34 @@ export type Database = {
           p_value: Json;
         };
         Returns: undefined;
+      };
+      spawn_market_news: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      claim_bank_interest: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      claim_property_rent: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      start_side_job: {
+        Args: { p_job_id: string };
+        Returns: Json;
+      };
+      claim_side_job: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      play_lucky_spin: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      claim_quest_reward: {
+        Args: { p_quest: string };
+        Returns: Json;
       };
     };
     Enums: Record<string, never>;

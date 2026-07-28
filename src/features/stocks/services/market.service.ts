@@ -5,8 +5,8 @@ import {
 } from "@/lib/market/simulated-market";
 import { createClient } from "@/lib/supabase/server";
 
-/** Tick when quotes older than 15s so buy/sell (30s window) stays fresh. */
-const STALE_MS = 15_000;
+/** Tick when quotes older than 10s — global shared cadence. */
+const STALE_MS = 10_000;
 
 export type StockListItem = {
   symbol: string;
@@ -114,6 +114,35 @@ export async function getPriceHistory(
       close: Number(row.price),
     }))
     .filter((row) => Number.isFinite(row.close) && row.close > 0);
+}
+
+export type TradeMarker = {
+  datetime: string;
+  price: number;
+  quantity: number;
+  side: "buy" | "sell";
+};
+
+export async function getUserTradeMarkers(
+  userId: string,
+  symbol: string,
+  limit = 40,
+): Promise<TradeMarker[]> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("trades")
+    .select("side, quantity, price, executed_at")
+    .eq("user_id", userId)
+    .eq("symbol", symbol.toUpperCase())
+    .order("executed_at", { ascending: true })
+    .limit(limit);
+
+  return (data ?? []).map((row) => ({
+    datetime: row.executed_at,
+    price: Number(row.price),
+    quantity: Number(row.quantity),
+    side: row.side === "sell" ? "sell" : "buy",
+  }));
 }
 
 export async function getMarketList(

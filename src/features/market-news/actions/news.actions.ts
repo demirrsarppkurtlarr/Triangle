@@ -19,6 +19,7 @@ export async function applyMarketNewsAction(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  await supabase.rpc("spawn_market_news");
   const { error } = await supabase.rpc("apply_market_news");
   if (error) return { error: error.message };
 
@@ -26,4 +27,15 @@ export async function applyMarketNewsAction(
   revalidatePath("/news");
   revalidatePath("/portfolio");
   return { success: "applied" };
+}
+
+/** Quiet spawn used by the 10s global market tick. */
+export async function spawnMarketNewsSilentAction(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  await supabase.rpc("spawn_market_news");
+  await supabase.rpc("apply_market_news");
 }

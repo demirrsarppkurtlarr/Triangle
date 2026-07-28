@@ -37,6 +37,8 @@ export function getNotificationIcon(type: NotificationType) {
       return Gift;
     case "market_news":
       return Newspaper;
+    case "income":
+      return Sparkles;
     default:
       return Bell;
   }
@@ -48,6 +50,7 @@ export function getNotificationAccent(type: NotificationType) {
     case "account_unfrozen":
     case "stock_order_filled":
     case "daily_reward":
+    case "income":
       return "bg-success/10 text-success";
     case "transfer_failed":
     case "account_frozen":

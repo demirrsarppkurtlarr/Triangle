@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatCurrency } from "@/utils/format";
 
 type AdminOverviewProps = {
   stats: {
@@ -29,10 +30,9 @@ type AdminOverviewProps = {
     totalTransfers: number;
     totalMinted: number;
   };
-  formatCurrency: (n: number) => string;
 };
 
-export function AdminOverview({ stats, formatCurrency }: AdminOverviewProps) {
+export function AdminOverview({ stats }: AdminOverviewProps) {
   const cards = [
     {
       label: "Users",
@@ -122,6 +122,11 @@ export function AdminOverview({ stats, formatCurrency }: AdminOverviewProps) {
                   href: "/admin/limits",
                   icon: Snowflake,
                   label: "Adjust transfer limits",
+                },
+                {
+                  href: "/admin/economy",
+                  icon: Coins,
+                  label: "Economy & news tools",
                 },
               ].map((item) => (
                 <Link

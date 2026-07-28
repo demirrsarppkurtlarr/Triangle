@@ -6,6 +6,7 @@ import { getComparisonBaselines } from "@/features/stocks/services/comparison.se
 import {
   getPriceHistory,
   getStockDetail,
+  getUserTradeMarkers,
   ensureFreshPrices,
 } from "@/features/stocks/services/market.service";
 import { createClient } from "@/lib/supabase/server";
@@ -29,7 +30,7 @@ export default async function StockDetailPage({ params }: StockDetailPageProps) 
   const detail = await getStockDetail(symbol, user.id);
   if (!detail) notFound();
 
-  const [{ data: account }, chartData, baselines] = await Promise.all([
+  const [{ data: account }, chartData, baselines, markers] = await Promise.all([
     supabase
       .from("bank_accounts")
       .select("balance")
@@ -37,6 +38,7 @@ export default async function StockDetailPage({ params }: StockDetailPageProps) 
       .single(),
     getPriceHistory(symbol, 120),
     getComparisonBaselines(symbol, detail.price),
+    getUserTradeMarkers(user.id, symbol),
   ]);
 
   return (
@@ -60,6 +62,7 @@ export default async function StockDetailPage({ params }: StockDetailPageProps) 
             week: baselines.week,
             month: baselines.month,
           }}
+          markers={markers}
         />
       </main>
     </>

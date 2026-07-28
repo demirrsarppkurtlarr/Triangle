@@ -75,6 +75,11 @@ export function useRealtimeActivity(
             item_trade:
               direction === "in" ? "Marketplace sale" : "Marketplace buy",
             daily_reward: "Daily reward",
+            interest: "Bank interest",
+            rent: "Property rent",
+            job_pay: "Job pay",
+            lottery: "Lucky spin",
+            quest_reward: "Quest reward",
           };
 
           const nextItem: ActivityItem = {
