@@ -5,19 +5,28 @@ import { usePathname } from "next/navigation";
 import {
   ArrowLeftRight,
   Bell,
+  Bitcoin,
   Briefcase,
   CircleDollarSign,
+  CreditCard,
   Gift,
   Home,
+  Landmark,
+  MessageCircle,
   Newspaper,
   Package,
+  Palette,
   Settings,
   Shield,
+  ShieldCheck,
   ShoppingBag,
+  Star,
   Store,
+  Target,
   Trophy,
   TrendingUp,
   User,
+  Wallet,
 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -45,12 +54,21 @@ export function AppNav({
     { href: "/dashboard", label: t.nav.home, icon: Home },
     { href: "/earn", label: "Kazanç", icon: CircleDollarSign },
     { href: "/rewards", label: t.nav.rewards, icon: Gift },
+    { href: "/battle-pass", label: "Battle Pass", icon: Star },
+    { href: "/stocks", label: t.nav.market, icon: TrendingUp },
+    { href: "/crypto", label: "Kripto", icon: Bitcoin },
+    { href: "/forex", label: "Döviz", icon: Wallet },
+    { href: "/predictions", label: "Tahmin", icon: Target },
+    { href: "/loans", label: "Kredi", icon: CreditCard },
+    { href: "/deposits", label: "Mevduat", icon: Landmark },
+    { href: "/insurance", label: "Sigorta", icon: ShieldCheck },
     { href: "/shop", label: t.nav.shop, icon: ShoppingBag },
     { href: "/inventory", label: t.nav.inventory, icon: Package },
-    { href: "/stocks", label: t.nav.market, icon: TrendingUp },
-    { href: "/news", label: t.nav.news, icon: Newspaper },
     { href: "/marketplace", label: t.nav.marketplace, icon: Store },
+    { href: "/news", label: t.nav.news, icon: Newspaper },
+    { href: "/chat", label: "Sohbet", icon: MessageCircle },
     { href: "/leaderboard", label: t.nav.leaderboard, icon: Trophy },
+    { href: "/themes", label: "Temalar", icon: Palette },
     { href: "/portfolio", label: t.nav.portfolio, icon: Briefcase },
     { href: "/transfer", label: t.nav.send, icon: ArrowLeftRight },
     { href: "/settings", label: t.nav.settings, icon: Settings },
@@ -66,8 +84,8 @@ export function AppNav({
   const mobileItems = [
     { href: "/dashboard", label: t.nav.home, icon: Home },
     { href: "/earn", label: "Kazanç", icon: CircleDollarSign },
-    { href: "/stocks", label: t.nav.market, icon: TrendingUp },
-    { href: "/leaderboard", label: t.nav.leaderboard, icon: Trophy },
+    { href: "/crypto", label: "Kripto", icon: Bitcoin },
+    { href: "/chat", label: "Sohbet", icon: MessageCircle },
     {
       href: unreadCount > 0 ? "/notifications" : "/transfer",
       label: unreadCount > 0 ? t.nav.alerts : t.nav.send,
@@ -76,19 +94,8 @@ export function AppNav({
   ];
 
   function isActive(href: string) {
-    if (href === "/stocks") return pathname.startsWith("/stocks");
-    if (href === "/portfolio") return pathname.startsWith("/portfolio");
-    if (href === "/admin") return pathname.startsWith("/admin");
-    if (href === "/shop") return pathname.startsWith("/shop");
-    if (href === "/inventory") return pathname.startsWith("/inventory");
-    if (href === "/marketplace") return pathname.startsWith("/marketplace");
-    if (href === "/notifications") return pathname.startsWith("/notifications");
-    if (href === "/rewards") return pathname.startsWith("/rewards");
-    if (href === "/earn") return pathname.startsWith("/earn");
-    if (href === "/leaderboard") return pathname.startsWith("/leaderboard");
-    if (href === "/news") return pathname.startsWith("/news");
-    if (href === "/settings") return pathname.startsWith("/settings");
-    return pathname === href;
+    if (href === "/dashboard") return pathname === href;
+    return pathname.startsWith(href);
   }
 
   if (variant === "mobile") {

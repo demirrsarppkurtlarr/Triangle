@@ -2,13 +2,17 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Bell,
+  CreditCard,
   Gift,
   LineChart,
+  MessageCircle,
   Newspaper,
   Package,
   Shield,
   Snowflake,
   Sparkles,
+  Star,
+  Target,
 } from "lucide-react";
 
 import type { NotificationType } from "@/features/dashboard/types";
@@ -39,6 +43,15 @@ export function getNotificationIcon(type: NotificationType) {
       return Newspaper;
     case "income":
       return Sparkles;
+    case "loan":
+    case "deposit_matured":
+      return CreditCard;
+    case "chat_message":
+      return MessageCircle;
+    case "prediction":
+      return Target;
+    case "battle_pass":
+      return Star;
     default:
       return Bell;
   }
@@ -51,6 +64,9 @@ export function getNotificationAccent(type: NotificationType) {
     case "stock_order_filled":
     case "daily_reward":
     case "income":
+    case "prediction":
+    case "battle_pass":
+    case "deposit_matured":
       return "bg-success/10 text-success";
     case "transfer_failed":
     case "account_frozen":
