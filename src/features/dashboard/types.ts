@@ -36,7 +36,12 @@ export type NotificationType =
   | "game_item"
   | "daily_reward"
   | "market_news"
-  | "income";
+  | "income"
+  | "loan"
+  | "deposit_matured"
+  | "chat_message"
+  | "prediction"
+  | "battle_pass";
 
 export type DashboardProfile = {
   id: string;

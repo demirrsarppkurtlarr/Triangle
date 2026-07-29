@@ -24,7 +24,19 @@ export type TransactionType =
   | "rent"
   | "job_pay"
   | "lottery"
-  | "quest_reward";
+  | "quest_reward"
+  | "loan_disbursement"
+  | "loan_repayment"
+  | "deposit_lock"
+  | "deposit_unlock"
+  | "forex_trade"
+  | "crypto_trade"
+  | "insurance_premium"
+  | "insurance_claim"
+  | "prediction_bet"
+  | "prediction_win"
+  | "battle_pass_reward"
+  | "theme_purchase";
 
 export type TransactionStatus =
   | "pending"
@@ -46,7 +58,12 @@ export type NotificationType =
   | "game_item"
   | "daily_reward"
   | "market_news"
-  | "income";
+  | "income"
+  | "loan"
+  | "deposit_matured"
+  | "chat_message"
+  | "prediction"
+  | "battle_pass";
 
 export type Database = {
   public: {
@@ -403,6 +420,7 @@ export type Database = {
           showcase_property_id: string | null;
           showcase_gadget_id: string | null;
           showcase_collectible_id: string | null;
+          active_theme: string;
           updated_at: string;
         };
         Insert: Record<string, unknown>;
@@ -478,6 +496,254 @@ export type Database = {
           started_at: string;
           completes_at: string;
           claimed: boolean;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      loans: {
+        Row: {
+          id: string;
+          user_id: string;
+          principal: number;
+          interest_rate: number;
+          total_due: number;
+          amount_paid: number;
+          installments: number;
+          paid_count: number;
+          status: string;
+          due_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      credit_scores: {
+        Row: {
+          user_id: string;
+          score: number;
+          loans_taken: number;
+          loans_repaid: number;
+          defaults: number;
+          updated_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      term_deposits: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          interest_rate: number;
+          term_days: number;
+          maturity_amount: number;
+          status: string;
+          matures_at: string;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      forex_pairs: {
+        Row: {
+          pair: string;
+          base_currency: string;
+          quote_currency: string;
+          rate: number;
+          prev_rate: number;
+          updated_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      forex_holdings: {
+        Row: {
+          id: string;
+          user_id: string;
+          currency: string;
+          amount: number;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      crypto_assets: {
+        Row: {
+          symbol: string;
+          name: string;
+          price: number;
+          prev_price: number;
+          volatility: number;
+          is_active: boolean;
+          updated_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      crypto_holdings: {
+        Row: {
+          id: string;
+          user_id: string;
+          symbol: string;
+          quantity: number;
+          average_cost: number;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      insurance_policies: {
+        Row: {
+          id: string;
+          user_id: string;
+          policy_type: string;
+          coverage_amount: number;
+          premium: number;
+          status: string;
+          expires_at: string;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      chat_messages: {
+        Row: {
+          id: string;
+          sender_id: string;
+          receiver_id: string | null;
+          channel: string;
+          content: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          sender_id: string;
+          receiver_id?: string | null;
+          channel?: string;
+          content: string;
+          created_at?: string;
+        };
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      seasons: {
+        Row: {
+          id: string;
+          name: string;
+          starts_at: string;
+          ends_at: string;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      season_missions: {
+        Row: {
+          id: string;
+          season_id: string;
+          title_en: string;
+          title_tr: string;
+          description_en: string;
+          description_tr: string;
+          mission_type: string;
+          target_value: number;
+          xp_reward: number;
+          cash_reward: number;
+          sort_order: number;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      user_season_progress: {
+        Row: {
+          id: string;
+          user_id: string;
+          season_id: string;
+          mission_id: string;
+          current_value: number;
+          completed: boolean;
+          claimed: boolean;
+          completed_at: string | null;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      user_season_xp: {
+        Row: {
+          user_id: string;
+          season_id: string;
+          total_xp: number;
+          level: number;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      predictions: {
+        Row: {
+          id: string;
+          symbol: string;
+          question_en: string;
+          question_tr: string;
+          direction: string;
+          target_price: number | null;
+          resolves_at: string;
+          resolved: boolean;
+          outcome: string | null;
+          snapshot_price: number;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      prediction_bets: {
+        Row: {
+          id: string;
+          prediction_id: string;
+          user_id: string;
+          bet_direction: string;
+          amount: number;
+          payout: number | null;
+          status: string;
+          created_at: string;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      custom_themes: {
+        Row: {
+          id: string;
+          name: string;
+          description_en: string;
+          description_tr: string;
+          price: number;
+          css_vars: Json;
+          is_free: boolean;
+          sort_order: number;
+        };
+        Insert: Record<string, unknown>;
+        Update: Record<string, unknown>;
+        Relationships: [];
+      };
+      user_themes: {
+        Row: {
+          user_id: string;
+          theme_id: string;
+          purchased_at: string;
         };
         Insert: Record<string, unknown>;
         Update: Record<string, unknown>;
@@ -687,6 +953,74 @@ export type Database = {
       };
       claim_quest_reward: {
         Args: { p_quest: string };
+        Returns: Json;
+      };
+      take_loan: {
+        Args: { p_amount: number; p_installments?: number };
+        Returns: Json;
+      };
+      repay_loan: {
+        Args: { p_loan_id: string };
+        Returns: Json;
+      };
+      create_term_deposit: {
+        Args: { p_amount: number; p_term_days?: number };
+        Returns: Json;
+      };
+      withdraw_term_deposit: {
+        Args: { p_deposit_id: string };
+        Returns: Json;
+      };
+      tick_forex_rates: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      buy_forex: {
+        Args: { p_pair: string; p_usd_amount: number };
+        Returns: Json;
+      };
+      sell_forex: {
+        Args: { p_pair: string; p_currency_amount: number };
+        Returns: Json;
+      };
+      tick_crypto_prices: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      buy_crypto: {
+        Args: { p_symbol: string; p_usd_amount: number };
+        Returns: Json;
+      };
+      sell_crypto: {
+        Args: { p_symbol: string; p_quantity: number };
+        Returns: Json;
+      };
+      buy_insurance: {
+        Args: { p_type: string; p_coverage: number };
+        Returns: Json;
+      };
+      send_chat_message: {
+        Args: { p_content: string; p_receiver_id?: string | null; p_channel?: string };
+        Returns: Json;
+      };
+      place_prediction_bet: {
+        Args: { p_prediction_id: string; p_direction: string; p_amount: number };
+        Returns: Json;
+      };
+      resolve_predictions: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      spawn_prediction: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      buy_theme: {
+        Args: { p_theme_id: string };
+        Returns: Json;
+      };
+      claim_season_mission: {
+        Args: { p_mission_id: string };
         Returns: Json;
       };
     };
